@@ -1,0 +1,127 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Course Summary Card -->
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            Enroll in {{ course.coursename }}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {% if course.image %}
+                                <img src="{{ course.image.url }}" class="img-fluid rounded" alt="{{ course.coursename }}">
+                                {% else %}
+                                <img src="{% static 'mainstyle/img/course-1.jpg' %}" class="img-fluid rounded" alt="{{ course.coursename }}">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <h5>{{ course.coursename }}</h5>
+                                <p class="text-muted">
+                                    <i class="fas fa-layer-group me-2"></i>{{ course.stream.stream_name }}<br>
+                                    <i class="fas fa-clock me-2"></i>{{ course.durationweeks }} weeks<br>
+                                    <i class="fas fa-tag me-2"></i>
+                                    {% if course.rate > 0 %}
+                                        ${{ course.rate }}
+                                    {% else %}
+                                        Free
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enrollment Form -->
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>
+                            Select Your Batch
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if not available_batches %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No batches available for this course at the moment. Please check back later.
+                            </div>
+                            <a href="{% url 'student_home' %}" class="btn btn-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Courses
+                            </a>
+                        {% else %}
+                            <form method="POST" action="{% url 'enroll_course' course.id %}">
+                                {% csrf_token %}
+                                
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Available Batches:</label>
+                                    <div class="row">
+                                        {% for batch in form.batch.field.queryset %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card h-100 {% if form.batch.value == batch.id|stringformat:'i' %}border-primary{% endif %}">
+                                                <div class="card-body">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" 
+                                                               name="batch" id="batch{{ batch.id }}" 
+                                                               value="{{ batch.id }}"
+                                                               {% if form.batch.value == batch.id|stringformat:'i' %}checked{% endif %}>
+                                                        <label class="form-check-label w-100" for="batch{{ batch.id }}">
+                                                            <h6 class="mb-1">{{ batch.batchname }}</h6>
+                                                            <p class="small text-muted mb-0">
+                                                                <i class="fas fa-code me-1"></i>Code: {{ batch.batchcode }}<br>
+                                                                {% if batch.startdate %}
+                                                                <i class="fas fa-calendar me-1"></i>Starts: {{ batch.startdate|date:"d M Y" }}
+                                                                {% endif %}
+                                                            </p>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="col-12">
+                                            <p class="text-muted">No batches available</p>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% if form.batch.errors %}
+                                    <div class="text-danger small mt-2">
+                                        {{ form.batch.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'student_home' %}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check-circle me-2"></i>Confirm Enrollment
+                                    </button>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

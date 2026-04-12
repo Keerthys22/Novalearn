@@ -1,0 +1,291 @@
+{% extends 'indexnav.html' %}
+{% load static %}
+
+{% block main %}
+<!-- Carousel Start -->
+<div class="container-fluid p-0 mb-5">
+    <div class="owl-carousel header-carousel position-relative">
+        <div class="owl-carousel-item position-relative">
+            <img class="img-fluid" src="{% static 'mainstyle/img/carousel-1.jpg' %}" alt="">
+            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(24, 29, 56, .7);">
+                <div class="container">
+                    <div class="row justify-content-start">
+                        <div class="col-sm-10 col-lg-8">
+                            <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Welcome to NovaLearn</h5>
+                            <h1 class="display-3 text-white animated slideInDown">The Best Online Learning Platform</h1>
+                            <p class="fs-5 text-white mb-4 pb-2">Empower your future with industry-relevant courses taught by expert instructors. Learn at your own pace, anytime, anywhere.</p>
+                            <a href="{% url 'studentreg' %}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Get Started</a>
+                            <a href="{% url 'about' %}" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="owl-carousel-item position-relative">
+            <img class="img-fluid" src="{% static 'mainstyle/img/carousel-2.jpg' %}" alt="">
+            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style="background: rgba(24, 29, 56, .7);">
+                <div class="container">
+                    <div class="row justify-content-start">
+                        <div class="col-sm-10 col-lg-8">
+                            <h5 class="text-primary text-uppercase mb-3 animated slideInDown">Quality Education</h5>
+                            <h1 class="display-3 text-white animated slideInDown">Learn From Industry Experts</h1>
+                            <p class="fs-5 text-white mb-4 pb-2">Access high-quality courses designed by professionals. Get certified and boost your career opportunities.</p>
+                            <a href="{% url 'studentreg' %}" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Join Now</a>
+                            <a href="{% url 'contact' %}" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Contact Us</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Carousel End -->
+
+<!-- Features Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Why Choose Us</h6>
+            <h1 class="mb-5">Why Learn With NovaLearn?</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="service-item text-center pt-3">
+                    <div class="p-4">
+                        <i class="fa fa-3x fa-graduation-cap text-primary mb-4"></i>
+                        <h5 class="mb-3">Expert Instructors</h5>
+                        <p>Learn from industry professionals with years of real-world experience in their fields.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="service-item text-center pt-3">
+                    <div class="p-4">
+                        <i class="fa fa-3x fa-globe text-primary mb-4"></i>
+                        <h5 class="mb-3">Flexible Learning</h5>
+                        <p>Access courses 24/7 from anywhere in the world. Learn at your own pace.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="service-item text-center pt-3">
+                    <div class="p-4">
+                        <i class="fa fa-3x fa-certificate text-primary mb-4"></i>
+                        <h5 class="mb-3">Get Certified</h5>
+                        <p>Earn recognized certificates upon course completion to boost your career.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
+                <div class="service-item text-center pt-3">
+                    <div class="p-4">
+                        <i class="fa fa-3x fa-headset text-primary mb-4"></i>
+                        <h5 class="mb-3">24/7 Support</h5>
+                        <p>Get assistance whenever you need it with our dedicated support team.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Features End -->
+
+<!-- About Start - Replaced with Stats/Highlights -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-start text-primary pe-3">Our Impact</h6>
+                <h1 class="mb-4">Transforming Lives Through Education</h1>
+                <p class="mb-4">At NovaLearn, we're committed to making quality education accessible to everyone. Our platform has helped thousands of students achieve their career goals and acquire new skills.</p>
+                
+                <div class="row gy-4">
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-users fa-3x text-primary flex-shrink-0"></i>
+                            <div class="ms-4">
+                                <h2 class="mb-0" data-toggle="counter-up">15000</h2>
+                                <p class="text-muted mb-0">Active Students</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-chalkboard-teacher fa-3x text-primary flex-shrink-0"></i>
+                            <div class="ms-4">
+                                <h2 class="mb-0" data-toggle="counter-up">250</h2>
+                                <p class="text-muted mb-0">Expert Teachers</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-book-open fa-3x text-primary flex-shrink-0"></i>
+                            <div class="ms-4">
+                                <h2 class="mb-0" data-toggle="counter-up">500</h2>
+                                <p class="text-muted mb-0">Available Courses</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-award fa-3x text-primary flex-shrink-0"></i>
+                            <div class="ms-4">
+                                <h2 class="mb-0" data-toggle="counter-up">50</h2>
+                                <p class="text-muted mb-0">Awards Won</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{% url 'about' %}" class="btn btn-primary py-3 px-5">Learn More About Us</a>
+                </div>
+            </div>
+            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="position-relative">
+                    <img class="img-fluid rounded" src="{% static 'mainstyle/img/about-2.jpg' %}" alt="">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                        <a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" class="btn btn-primary rounded-pill py-3 px-5">Watch Our Story</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End - Replaced with Stats -->
+
+<!-- Popular Courses Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Courses</h6>
+            <h1 class="mb-5">Popular Courses</h1>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for course in popular_courses %}
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="course-item bg-light">
+                    <div class="position-relative overflow-hidden">
+                        {% if course.image %}
+                        <img class="img-fluid" src="{{ course.image.url }}" alt="{{ course.coursename }}" style="width: 100%; height: 200px; object-fit: cover;">
+                        {% else %}
+                        <img class="img-fluid" src="{% static 'mainstyle/img/course-1.jpg' %}" alt="{{ course.coursename }}" style="width: 100%; height: 200px; object-fit: cover;">
+                        {% endif %}
+                
+                            <a href="{% url 'studentreg' %}" class="flex-shrink-0 btn btn-sm btn-primary px-3" style="border-radius: 0 30px 30px 0;">Know More</a>
+                        
+                    </div>
+                    <div class="text-center p-4 pb-0">
+                        <h3 class="mb-0">₹{{ course.rate }}</h3>
+                        <div class="mb-3">
+                            <small class="fa fa-star text-primary"></small>
+                            <small class="fa fa-star text-primary"></small>
+                            <small class="fa fa-star text-primary"></small>
+                            <small class="fa fa-star text-primary"></small>
+                            <small class="fa fa-star text-primary"></small>
+                            <small>({{ forloop.counter }}0+)</small>
+                        </div>
+                        <h5 class="mb-4">{{ course.coursename|truncatechars:40 }}</h5>
+                        <small class="text-muted"><i class="fa fa-tag me-1"></i>{{ course.stream.stream_name }}</small>
+                    </div>
+                    <div class="d-flex border-top">
+                        <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>{{ course.durationweeks }} weeks</small>
+                        <small class="flex-fill text-center py-2"><i class="fa fa-user text-primary me-2"></i>Enroll Now</small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No courses available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="#" class="btn btn-primary py-3 px-5">View All Courses</a>
+        </div>
+    </div>
+</div>
+<!-- Popular Courses End -->
+
+<!-- Teachers/Instructors Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Instructors</h6>
+            <h1 class="mb-5">Meet Our Expert Teachers</h1>
+        </div>
+        <div class="row g-4">
+            {% for teacher in teachers %}
+            <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="team-item bg-light">
+                    <div class="overflow-hidden" style="height: 250px;">
+                        {% if teacher.profilepic %}
+                        <img class="img-fluid" src="{{ teacher.profilepic.url }}" alt="{{ teacher.firstname }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        <img class="img-fluid" src="{% static 'mainstyle/img/team-1.jpg' %}" alt="{{ teacher.firstname }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <div class="position-relative d-flex justify-content-center" style="margin-top: -23px;">
+                        <div class="bg-light d-flex justify-content-center pt-2 px-1">
+                            <a class="btn btn-sm-square btn-primary mx-1" href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href="#"><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-sm-square btn-primary mx-1" href="#"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="text-center p-4">
+                        <h5 class="mb-1">{{ teacher.firstname }} {{ teacher.lastname }}</h5>
+                        <small class="text-primary">{{ teacher.qualification }}</small>
+                        <p class="text-muted small mt-2 mb-0">{{ teacher.department.stream_name }}</p>
+                        <small class="text-muted"><i class="fa fa-briefcase me-1"></i>{{ teacher.experienceyear }} years exp.</small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p>No teachers available at the moment.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<!-- Teachers/Instructors End -->
+
+<!-- Testimonial Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">Testimonial</h6>
+            <h1 class="mb-5">What Our Students Say!</h1>
+        </div>
+        <div class="owl-carousel testimonial-carousel position-relative">
+            <div class="testimonial-item text-center">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="{% static 'mainstyle/img/testimonial-1.jpg' %}" style="width: 80px; height: 80px;">
+                <h5 class="mb-0">Sarah Johnson</h5>
+                <p>Web Development Student</p>
+                <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">"NovaLearn transformed my career! The courses are well-structured and the instructors are incredibly supportive. I landed my dream job right after completing the program."</p>
+                </div>
+            </div>
+            <div class="testimonial-item text-center">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="{% static 'mainstyle/img/testimonial-2.jpg' %}" style="width: 80px; height: 80px;">
+                <h5 class="mb-0">Michael Chen</h5>
+                <p>Data Science Student</p>
+                <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">"The flexibility of learning at my own pace while working full-time was perfect. The projects were practical and helped me build a strong portfolio."</p>
+                </div>
+            </div>
+            <div class="testimonial-item text-center">
+                <img class="border rounded-circle p-2 mx-auto mb-3" src="{% static 'mainstyle/img/testimonial-3.jpg' %}" style="width: 80px; height: 80px;">
+                <h5 class="mb-0">Emily Rodriguez</h5>
+                <p>Digital Marketing Student</p>
+                <div class="testimonial-text bg-light text-center p-4">
+                    <p class="mb-0">"The certification from NovaLearn gave me the credibility I needed to start my own marketing consultancy. Highly recommended!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Testimonial End -->
+{% endblock %}

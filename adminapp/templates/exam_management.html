@@ -1,0 +1,729 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+<div id="content" style="margin-top:50px;">
+    <!-- Page Header with Messages -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Exam Management</h1>
+            {% if messages %}
+            <div class="mt-2">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#startExamModal">
+            <i class="fas fa-plus me-2"></i>Start New Exam
+        </button>
+    </div>
+
+    <!-- Filter and Search Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Filter by Stream</label>
+                            <select class="form-select" id="streamFilter">
+                                <option value="">All Streams</option>
+                                {% for stream in streams %}
+                                <option value="{{ stream.id }}">{{ stream.streamcode }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Filter by Course</label>
+                            <select class="form-select" id="courseFilter">
+                                <option value="">All Courses</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}" data-stream="{{ course.stream.id }}">
+                                    {{ course.coursename }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Search Exams</label>
+                            <input type="text" class="form-control" id="examSearch" placeholder="Search by exam code or course...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exams Cards Display -->
+    <div class="row" id="examsContainer">
+        {% if exams %}
+            {% for exam_item in exams %}
+            <div class="col-md-4 mb-4 exam-card" 
+                 data-stream="{{ exam_item.courseid.stream.id }}" 
+                 data-course="{{ exam_item.courseid.id }}"
+                 data-search="{{ exam_item.examcode|lower }} {{ exam_item.courseid.coursename|lower }} {{ exam_item.courseid.stream.streamcode|lower }}">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-file-alt me-2"></i>{{ exam_item.examcode }}
+                        </h6>
+                        <span class="badge bg-info">{{ exam_item.tbl_examquestion_set.count }} Q</span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ exam_item.courseid.coursename }}</h5>
+                        <p class="card-text mb-2">
+                            <span class="badge stream-badge me-2">{{ exam_item.courseid.stream.streamcode }}</span>
+                            <span class="badge bg-secondary">{{ exam_item.courseid.durationweeks }} weeks</span>
+                        </p>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Total Score:</small>
+                                <small class="text-primary fw-bold">{{ exam_item.totalscore }}</small>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Duration:</small>
+                                <small class="text-primary fw-bold">{{ exam_item.duration }} mins</small>
+                            </div>
+                        </div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            {% with question_count=exam_item.tbl_examquestion_set.count %}
+                            {% if question_count == 0 %}
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                            {% elif question_count < 10 %}
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 30%"></div>
+                            {% elif question_count < 20 %}
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 60%"></div>
+                            {% else %}
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-sm btn-primary manage-questions-btn" 
+                                    data-exam-id="{{ exam_item.id }}"
+                                    data-exam-code="{{ exam_item.examcode }}">
+                                <i class="fas fa-edit me-1"></i>Manage Questions
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-exam-btn" 
+                                    data-exam-id="{{ exam_item.id }}">
+                                <i class="fas fa-trash me-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Exams Found</h4>
+                    <p class="text-muted">Start by creating your first exam!</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Start Exam Modal -->
+<div class="modal fade" id="startExamModal" tabindex="-1" aria-labelledby="startExamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="startExamModalLabel">
+                    <i class="fas fa-play-circle me-2"></i>Start New Exam
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'create_exam' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="streamSelect" class="form-label">Select Stream *</label>
+                            <select class="form-select" id="streamSelect" name="stream_id" required>
+                                <option value="">Choose Stream...</option>
+                                {% for stream in streams %}
+                                <option value="{{ stream.id }}">{{ stream.streamcode }} - {{ stream.stream_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                       <div class="col-md-6 mb-3">
+                            <label for="courseSelect" class="form-label">Select Course *</label>
+                            <select class="form-select" id="courseSelect" name="course_id" required>
+                                <option value="">Choose Course...</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.coursename }} ({{ course.stream.streamcode }})</option>
+                                {% endfor %}
+                            </select>
+                       </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="examCode" class="form-label">Exam Code *</label>
+                            <input type="text" class="form-control" id="examCode" name="exam_code" 
+                                   placeholder="e.g., EXAM2024-CS01" required>
+                            <small class="form-text text-muted">Unique identifier for the exam</small>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="totalScore" class="form-label">Total Score *</label>
+                            <input type="number" class="form-control" id="totalScore" name="total_score" 
+                                   min="1" max="1000" value="100" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="duration" class="form-label">Duration (minutes) *</label>
+                            <input type="number" class="form-control" id="duration" name="duration" 
+                                   min="10" max="300" value="60" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Create Exam
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Manage Questions Modal -->
+<div class="modal fade" id="manageQuestionsModal" tabindex="-1" aria-labelledby="manageQuestionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="manageQuestionsModalLabel">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Manage Questions for: <span id="examCodeTitle"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Add Question Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Question</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="addQuestionForm">
+                            {% csrf_token %}
+                            <input type="hidden" id="currentExamId" name="exam_id">
+                            <div class="mb-3">
+                                <label for="questionText" class="form-label">Question *</label>
+                                <textarea class="form-control" id="questionText" name="question" 
+                                          rows="3" placeholder="Enter your question here..." required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Options * (Tick the correct answer)</label>
+                                <div id="optionsContainer">
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-text">
+                                            <input class="form-check-input mt-0" type="radio" name="correct_option" value="0" checked>
+                                        </div>
+                                        <input type="text" class="form-control" name="options[]" placeholder="Option 1" required>
+                                        <button type="button" class="btn btn-outline-danger remove-option-btn" disabled>
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <div class="input-group-text">
+                                            <input class="form-check-input mt-0" type="radio" name="correct_option" value="1">
+                                        </div>
+                                        <input type="text" class="form-control" name="options[]" placeholder="Option 2" required>
+                                        <button type="button" class="btn btn-outline-danger remove-option-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addOptionBtn">
+                                    <i class="fas fa-plus me-1"></i>Add Option
+                                </button>
+                                <small class="form-text text-muted">Minimum 2 options, maximum 5 options</small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Add Question
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Questions List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-list me-2"></i>Existing Questions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="questionsList">
+                            <!-- Questions will be loaded here via AJAX -->
+                            <div class="text-center py-5">
+                                <i class="fas fa-spinner fa-spin fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">Loading questions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Question Modal -->
+<div class="modal fade" id="editQuestionModal" tabindex="-1" aria-labelledby="editQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="editQuestionModalLabel">
+                    <i class="fas fa-edit me-2"></i>Edit Question
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editQuestionForm">
+                {% csrf_token %}
+                <input type="hidden" id="editQuestionId" name="question_id">
+                <input type="hidden" id="editExamId" name="exam_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editQuestionText" class="form-label">Question *</label>
+                        <textarea class="form-control" id="editQuestionText" name="question" 
+                                  rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Options * (Tick the correct answer)</label>
+                        <div id="editOptionsContainer">
+                            <!-- Options will be dynamically added here -->
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-info" id="editAddOptionBtn">
+                            <i class="fas fa-plus me-1"></i>Add Option
+                        </button>
+                        <small class="form-text text-muted">Minimum 2 options, maximum 5 options</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-save me-2"></i>Update Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this <span id="deleteItemType"></span>?</p>
+                <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .exam-card {
+        transition: transform 0.3s;
+    }
+    .exam-card:hover {
+        transform: translateY(-5px);
+    }
+    .question-item {
+        border-left: 4px solid #4e73df;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    .option-item {
+        padding: 8px;
+        margin: 5px 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+    .correct-option {
+        border-color: #1cc88a;
+        background: rgba(28, 200, 138, 0.1);
+    }
+    .option-checkbox {
+        margin-right: 10px;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function () {
+    console.log('Document ready - Exam Management');
+
+    /* ================= FILTER ================= */
+    $('#streamFilter, #courseFilter, #examSearch').on('input change', function () {
+        const streamFilter = $('#streamFilter').val();
+        const courseFilter = $('#courseFilter').val();
+        const searchTerm = $('#examSearch').val().toLowerCase();
+
+        $('.exam-card').each(function () {
+            const card = $(this);
+            const stream = card.data('stream');
+            const course = card.data('course');
+            const search = card.data('search');
+
+            const match =
+                (!streamFilter || stream == streamFilter) &&
+                (!courseFilter || course == courseFilter) &&
+                (!searchTerm || search.includes(searchTerm));
+
+            card.toggle(match);
+        });
+    });
+
+    /* ================= MANAGE QUESTIONS - FIXED ================= */
+    $(document).on('click', '.manage-questions-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Manage questions button clicked');
+        
+        const examId = $(this).data('exam-id');
+        const examCode = $(this).data('exam-code');
+        
+        console.log('Exam ID:', examId, 'Exam Code:', examCode);
+        
+        if (!examId || !examCode) {
+            console.error('Missing exam data');
+            alert('Error: Missing exam data');
+            return;
+        }
+        
+        $('#currentExamId').val(examId);
+        $('#examCodeTitle').text(examCode);
+        
+        // Show loading
+        $('#questionsList').html(`
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading questions...</p>
+            </div>
+        `);
+        
+        // Load questions
+        $.get("{% url 'get_exam_questions' %}", { exam_id: examId }, function (res) {
+            console.log('Questions response:', res);
+            
+            if (res.success) {
+                let html = '';
+                if (res.questions && res.questions.length > 0) {
+                    res.questions.forEach((q, i) => {
+                        html += `<div class="question-item mb-3 p-3 border rounded">
+                            <h6><b>Q${i + 1}:</b> ${q.question_text}</h6>`;
+                        
+                        q.options.forEach((o, idx) => {
+                            html += `<div class="option-item ${o.is_correct ? 'correct-option' : ''}">
+                                <span class="me-2">${idx + 1}.</span>
+                                ${o.option_text}
+                                ${o.is_correct ? ' <span class="badge bg-success ms-2">Correct</span>' : ''}
+                            </div>`;
+                        });
+                        
+                        html += `
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-info edit-question-btn" 
+                                        data-question-id="${q.id}">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-question-btn" 
+                                        data-question-id="${q.id}">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    html = '<div class="alert alert-info">No questions found. Add some questions to get started!</div>';
+                }
+                
+                $('#questionsList').html(html);
+            } else {
+                $('#questionsList').html('<div class="alert alert-danger">Failed to load questions</div>');
+            }
+        }).fail(function() {
+            $('#questionsList').html('<div class="alert alert-danger">Error loading questions</div>');
+        });
+        
+        // Show modal
+        const manageQuestionsModal = new bootstrap.Modal(document.getElementById('manageQuestionsModal'));
+        manageQuestionsModal.show();
+    });
+
+    /* ================= DELETE EXAM ================= */
+    $(document).on('click', '.delete-exam-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Delete exam button clicked');
+        
+        const examId = $(this).data('exam-id');
+        console.log('Delete exam ID:', examId);
+        
+        if (!confirm('Are you sure you want to delete this exam? This action cannot be undone.')) {
+            return;
+        }
+        
+        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        
+        $.ajax({
+            url: "{% url 'delete_exam' %}",
+            method: "POST",
+            data: {
+                exam_id: examId,
+                csrfmiddlewaretoken: csrfToken
+            },
+            success: function (res) {
+                console.log('Delete response:', res);
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to delete exam: ' + (res.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete error:', error);
+                alert('Error deleting exam: ' + error);
+            }
+        });
+    });
+
+    /* ================= ADD QUESTION ================= */
+    $('#addQuestionForm').submit(function (e) {
+        e.preventDefault();
+        console.log('Add question form submitted');
+        
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: "{% url 'add_question' %}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                console.log('Add question response:', res);
+                if (res.success) {
+                    // Reload questions
+                    $('.manage-questions-btn[data-exam-id="' + $('#currentExamId').val() + '"]').click();
+                    $('#addQuestionForm')[0].reset();
+                    // Reset to 2 options
+                    $('#optionsContainer').html(`
+                        <div class="input-group mb-2">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="radio" name="correct_option" value="0" checked>
+                            </div>
+                            <input type="text" class="form-control" name="options[]" placeholder="Option 1" required>
+                            <button type="button" class="btn btn-outline-danger remove-option-btn" disabled>
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="input-group mb-2">
+                            <div class="input-group-text">
+                                <input class="form-check-input mt-0" type="radio" name="correct_option" value="1">
+                            </div>
+                            <input type="text" class="form-control" name="options[]" placeholder="Option 2" required>
+                            <button type="button" class="btn btn-outline-danger remove-option-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `);
+                } else {
+                    alert('Failed to add question: ' + (res.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Add question error:', error);
+                alert('Error adding question: ' + error);
+            }
+        });
+    });
+
+    /* ================= ADD OPTION (ADD FORM) ================= */
+    $('#addOptionBtn').click(function () {
+        const container = $('#optionsContainer');
+        const count = container.find('.input-group').length;
+
+        if (count >= 5) {
+            alert('Maximum 5 options allowed');
+            return;
+        }
+
+        container.append(`
+            <div class="input-group mb-2">
+                <div class="input-group-text">
+                    <input type="radio" name="correct_option" value="${count}">
+                </div>
+                <input type="text" class="form-control" name="options[]" placeholder="Option ${count + 1}" required>
+                <button type="button" class="btn btn-outline-danger remove-option-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `);
+    });
+
+    /* ================= REMOVE OPTION ================= */
+    $(document).on('click', '.remove-option-btn', function () {
+        const container = $(this).closest('.input-group').parent();
+        
+        if (container.children('.input-group').length <= 2) {
+            alert('Minimum 2 options required');
+            return;
+        }
+        
+        $(this).closest('.input-group').remove();
+        
+        // Update radio values and placeholders
+        container.find('.input-group').each(function (i, el) {
+            $(el).find('input[type="radio"]').val(i);
+            $(el).find('input.form-control').attr('placeholder', 'Option ' + (i + 1));
+        });
+    });
+
+    /* ================= EDIT QUESTION ================= */
+    $(document).on('click', '.edit-question-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Edit question button clicked');
+        
+        const questionId = $(this).data('question-id');
+        const examId = $('#currentExamId').val();
+        
+        $.get("{% url 'get_question_details' %}", {
+            question_id: questionId,
+            exam_id: examId
+        }, function (res) {
+            console.log('Edit question response:', res);
+            
+            if (!res.success) {
+                alert('Failed to load question details');
+                return;
+            }
+            
+            $('#editQuestionId').val(questionId);
+            $('#editExamId').val(examId);
+            $('#editQuestionText').val(res.question_text);
+            $('#editOptionsContainer').empty();
+            
+            res.options.forEach((o, i) => {
+                $('#editOptionsContainer').append(`
+                    <div class="input-group mb-2">
+                        <div class="input-group-text">
+                            <input type="radio" name="correct_option" value="${i}" ${o.is_correct ? 'checked' : ''}>
+                        </div>
+                        <input class="form-control" name="options[]" value="${o.option_text.replace(/"/g, '&quot;')}" required>
+                        <button type="button" class="btn btn-outline-danger remove-option-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `);
+            });
+            
+            new bootstrap.Modal(document.getElementById('editQuestionModal')).show();
+        });
+    });
+
+    /* ================= UPDATE QUESTION ================= */
+    $('#editQuestionForm').submit(function (e) {
+        e.preventDefault();
+        console.log('Update question form submitted');
+        
+        const formData = new FormData(this);
+        const examId = $('#editExamId').val();
+        
+        $.ajax({
+            url: "{% url 'update_question' %}",
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                console.log('Update response:', res);
+                if (res.success) {
+                    // Reload questions
+                    $('.manage-questions-btn[data-exam-id="' + examId + '"]').click();
+                    bootstrap.Modal.getInstance(document.getElementById('editQuestionModal')).hide();
+                } else {
+                    alert('Failed to update question: ' + (res.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Update error:', error);
+                alert('Error updating question: ' + error);
+            }
+        });
+    });
+
+    /* ================= DELETE QUESTION ================= */
+    $(document).on('click', '.delete-question-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Delete question button clicked');
+        
+        const questionId = $(this).data('question-id');
+        const examId = $('#currentExamId').val();
+        
+        if (!confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+            return;
+        }
+        
+        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        
+        $.ajax({
+            url: "{% url 'delete_question' %}",
+            method: "POST",
+            data: {
+                question_id: questionId,
+                exam_id: examId,
+                csrfmiddlewaretoken: csrfToken
+            },
+            success: function (res) {
+                console.log('Delete question response:', res);
+                if (res.success) {
+                    // Reload questions
+                    $('.manage-questions-btn[data-exam-id="' + examId + '"]').click();
+                } else {
+                    alert('Failed to delete question: ' + (res.error || 'Unknown error'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete question error:', error);
+                alert('Error deleting question: ' + error);
+            }
+        });
+    });
+});
+</script>
+
+
+{% endblock %}

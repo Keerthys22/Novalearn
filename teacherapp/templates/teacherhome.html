@@ -1,0 +1,235 @@
+ {% extends 'teacherbase.html' %}
+   {% block main %}
+   <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>24</h3>
+                        <p>Recorded Classes</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>142</h3>
+                        <p>Total Students</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>68</h3>
+                        <p>Assignments to Grade</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>12</h3>
+                        <p>Pending Doubts</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Dashboard Sections -->
+            <div class="dashboard-sections">
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-history"></i> Recent Activity
+                    </h3>
+                    <ul class="activity-list">
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-upload"></i>
+                            </div>
+                            <div class="activity-details">
+                                <h4>Uploaded "Python Basics" class</h4>
+                                <p>2 hours ago • CSE Branch</p>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="activity-details">
+                                <h4>Graded 15 assignments</h4>
+                                <p>Yesterday • Web Development</p>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-comment"></i>
+                            </div>
+                            <div class="activity-details">
+                                <h4>Responded to student doubt</h4>
+                                <p>2 days ago • Data Structures</p>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="activity-details">
+                                <h4>Created new exam</h4>
+                                <p>3 days ago • Mechanical Engineering</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="#" class="view-all">View All Activity <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <!-- Recent Submissions -->
+                <div class="dashboard-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-file-upload"></i> Recent Submissions
+                    </h3>
+                    <ul class="recent-submissions">
+                        <li class="submission-item">
+                            <div class="submission-status pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="submission-details">
+                                <h4>Algorithm Assignment</h4>
+                                <p>12 submissions pending • Due: Tomorrow</p>
+                            </div>
+                        </li>
+                        <li class="submission-item">
+                            <div class="submission-status submitted">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="submission-details">
+                                <h4>Web Development Project</h4>
+                                <p>28/32 submitted • Graded: 15</p>
+                            </div>
+                        </li>
+                        <li class="submission-item">
+                            <div class="submission-status pending">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="submission-details">
+                                <h4>Physics Lab Report</h4>
+                                <p>8 submissions pending • Due: 3 days</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="#" class="view-all">View All Submissions <i class="fas fa-arrow-right"></i></a>
+                </div>
+                
+                <!-- Upcoming Deadlines -->
+                <div class="dashboard-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-calendar-alt"></i> Upcoming Deadlines
+                    </h3>
+                    <ul class="upcoming-deadlines">
+                        <li class="deadline-item">
+                            <div class="deadline-icon">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="deadline-details">
+                                <h4>Algorithm Assignment Deadline</h4>
+                                <p>Tomorrow, 11:59 PM • CSE Branch</p>
+                            </div>
+                        </li>
+                        <li class="deadline-item">
+                            <div class="deadline-icon">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="deadline-details">
+                                <h4>Mid-Term Exam Creation</h4>
+                                <p>In 3 days • All Streams</p>
+                            </div>
+                        </li>
+                        <li class="deadline-item">
+                            <div class="deadline-icon">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="deadline-details">
+                                <h4>Monthly Progress Report</h4>
+                                <p>In 5 days • Due to Admin</p>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="#" class="view-all">View All Deadlines <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="dashboard-card" style="margin-top: 30px;">
+                <h3 class="section-title">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </h3>
+                <div class="quick-actions">
+                    <a href="#" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <span>Upload Class</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <span>Create Assignment</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <span>Schedule Exam</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <span>Add Study Material</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <span>View Analytics</span>
+                    </a>
+                    <a href="#" class="action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <span>Answer Doubts</span>
+                    </a>
+                </div>
+            </div>
+            {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

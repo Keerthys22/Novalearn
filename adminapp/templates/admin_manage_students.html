@@ -1,0 +1,269 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<div id="content" style="margin-top:50px;">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Manage Students</h1>
+        <a href="{% url 'export_students_csv' %}" class="btn btn-success btn-sm">
+            <i class="fas fa-download me-2"></i>Export to CSV
+        </a>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Students</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_students }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Active Enrollments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_enrollments }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-graduation-cap fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Completed Courses</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ completed_courses }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+   <div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Filter Students</h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{% url 'manage_students' %}" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Course</label>
+                <select name="course" class="form-select">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" 
+                        {% if selected_course|stringformat:"s" == course.id|stringformat:"s" %}selected{% endif %}>
+                        {{ course.coursename }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Batch</label>
+                <select name="batch" class="form-select">
+                    <option value="">All Batches</option>
+                    {% for batch in batches %}
+                    <option value="{{ batch.id }}" 
+                        {% if selected_batch|stringformat:"s" == batch.id|stringformat:"s" %}selected{% endif %}>
+                        {{ batch.batchname }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="ongoing" {% if selected_status == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                    <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" 
+                       placeholder="Name, Email, Phone..." value="{{ search_query }}">
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-2"></i>Apply Filters
+                </button>
+                <a href="{% url 'manage_students' %}" class="btn btn-secondary">
+                    <i class="fas fa-redo me-2"></i>Reset
+                </a>
+            </div>
+            
+            <!-- Display active filters -->
+            {% if selected_course or selected_batch or selected_status or search_query %}
+            <div class="col-12 mt-3">
+                <div class="alert alert-info">
+                    <strong>Active Filters:</strong>
+                    {% if selected_course %}
+                        {% for course in courses %}
+                            {% if course.id|stringformat:"s" == selected_course|stringformat:"s" %}
+                                <span class="badge bg-primary me-2">Course: {{ course.coursename }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if selected_batch %}
+                        {% for batch in batches %}
+                            {% if batch.id|stringformat:"s" == selected_batch|stringformat:"s" %}
+                                <span class="badge bg-primary me-2">Batch: {{ batch.batchname }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if selected_status %}
+                        <span class="badge bg-primary me-2">Status: {{ selected_status|title }}</span>
+                    {% endif %}
+                    {% if search_query %}
+                        <span class="badge bg-primary me-2">Search: "{{ search_query }}"</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+    <!-- Students Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Enrolled Students</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Course Name</th>
+                            <th>Progress</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if enrollment.studentid.profile_pic %}
+                                    <img src="{{ enrollment.studentid.profile_pic.url }}" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                                    {% else %}
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                        {{ enrollment.studentid.first_name|first|upper }}{{ enrollment.studentid.last_name|first|upper }}
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ enrollment.studentid.first_name }} {{ enrollment.studentid.last_name }}</strong>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ enrollment.studentid.login.email }}</td>
+                            <td>
+                                <strong>{{ enrollment.enrolled_batchid.course.coursename }}</strong><br>
+                                <small class="text-muted">Batch: {{ enrollment.enrolled_batchid.batchname }}</small>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if enrollment.progress >= 80 %}bg-success{% elif enrollment.progress >= 50 %}bg-info{% else %}bg-warning{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {{ enrollment.progress }}%;" 
+                                         aria-valuenow="{{ enrollment.progress }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100">
+                                        {{ enrollment.progress }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if enrollment.status_display == 'Completed' %}
+                                <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                <span class="badge bg-primary">Ongoing</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'student_detail' enrollment.studentid.id %}" class="btn btn-sm btn-info" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'student_payments' enrollment.studentid.id %}" class="btn btn-sm btn-warning" title="View Payments">
+                                    <i class="fas fa-money-bill"></i>
+                                </a>
+                                <a href="{% url 'student_progress' enrollment.studentid.id enrollment.id %}" class="btn btn-sm btn-success" title="View Progress">
+                                    <i class="fas fa-chart-line"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No students found</h5>
+                                <p class="text-muted">Try adjusting your filters</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+    .border-left-danger {
+        border-left: 4px solid #e74a3b !important;
+    }
+    .progress {
+        background-color: #eaecf4;
+        border-radius: 10px;
+    }
+    .progress-bar {
+        border-radius: 10px;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}

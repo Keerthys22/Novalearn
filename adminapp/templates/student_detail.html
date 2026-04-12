@@ -1,0 +1,304 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<div id="content" style="margin-top:50px;">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Student Details</h1>
+        <div>
+            <a href="{% url 'manage_students' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left me-2"></i>Back to Students
+            </a>
+        </div>
+    </div>
+
+    <!-- Student Profile Card -->
+    <div class="row">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Basic Information</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        {% if student.profile_pic %}
+                        <img src="{{ student.profile_pic.url }}" class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 150px; height: 150px; font-size: 48px;">
+                            {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <h4 class="mb-1">{{ student.first_name }} {{ student.last_name }}</h4>
+                    <p class="text-muted mb-3">{{ student.login.email }}</p>
+                    
+                    <hr>
+                    
+                    <div class="text-start">
+                        <p><strong><i class="fas fa-phone me-2 text-primary"></i>Phone:</strong> {{ student.phno }}</p>
+                        <p><strong><i class="fas fa-calendar me-2 text-primary"></i>Date of Birth:</strong> {{ student.dob|date:"d M Y" }}</p>
+                        <p><strong><i class="fas fa-venus-mars me-2 text-primary"></i>Gender:</strong> {{ student.gender }}</p>
+                        <p><strong><i class="fas fa-calendar-check me-2 text-primary"></i>Registration Date:</strong> {{ student.created_at|date:"d M Y" }}</p>
+                        <p><strong><i class="fas fa-clock me-2 text-primary"></i>Last Login:</strong> 
+                            {% if last_login %}
+                                {{ last_login|date:"d M Y, h:i A" }}
+                            {% else %}
+                                <span class="text-muted">Not available</span>
+                            {% endif %}
+                        </p>
+                        <p><strong><i class="fas fa-graduation-cap me-2 text-primary"></i>Education:</strong> {{ student.educational_background }}</p>
+                        <p><strong><i class="fas fa-check-circle me-2 text-primary"></i>Status:</strong> 
+                            <span class="badge {% if student.status == 'Active' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ student.status }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Summary Card - UPDATED -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment Summary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h3 class="text-success">₹{{ total_paid|floatformat:2 }}</h3>
+                        <p class="text-muted">Total Paid</p>
+                    </div>
+                    <div class="text-center mb-3">
+                        <h3 class="text-danger">₹{{ total_pending|floatformat:2 }}</h3>
+                        <p class="text-muted">Total Pending</p>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="text-primary">{{ completed_payments }}</h5>
+                            <small class="text-muted">Completed</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-warning">{{ pending_payments }}</h5>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Enrollment Fee Info -->
+                    <div class="alert alert-info mt-3 mb-0 small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Enrollment Fee: ₹{{ enrollment_fee|floatformat:2 }} (included in course total)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Activity (30 Days)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <i class="fas fa-file-upload fa-2x text-primary"></i>
+                            </div>
+                            <h5>{{ recent_submissions }}</h5>
+                            <small class="text-muted">Submissions</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <i class="fas fa-question-circle fa-2x text-warning"></i>
+                            </div>
+                            <h5>{{ recent_doubts }}</h5>
+                            <small class="text-muted">Doubts Asked</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7">
+            <!-- Enrolled Courses Card - UPDATED with payment details -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Enrolled Courses</h6>
+                </div>
+                <div class="card-body">
+                    {% for enrollment in enrollments %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">{{ enrollment.enrolled_batchid.course.coursename }}</h5>
+                            <div>
+                                <span class="badge {% if enrollment.course_status == 'completed' %}bg-success{% else %}bg-primary{% endif %} me-1">
+                                    {{ enrollment.course_status|title }}
+                                </span>
+                                {% if enrollment.is_fully_paid %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Paid
+                                </span>
+                                {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-clock me-1"></i>Partial
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-layer-group me-2"></i>Batch: {{ enrollment.enrolled_batchid.batchname }} |
+                            <i class="fas fa-calendar me-2"></i>Enrolled: {{ enrollment.enrollment_date|date:"d M Y" }}
+                        </p>
+                        
+                        <!-- Course Fee Details -->
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <small><strong>Course Fee:</strong> ₹{{ enrollment.course_total|floatformat:2 }}</small>
+                            </div>
+                            <div class="col-md-4">
+                                <small><strong>Paid:</strong> ₹{{ enrollment.total_paid|floatformat:2 }}</small>
+                            </div>
+                            <div class="col-md-4">
+                                <small><strong>Pending:</strong> 
+                                    <span class="{% if enrollment.pending_amount > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                        ₹{{ enrollment.pending_amount|floatformat:2 }}
+                                    </span>
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Progress Bar -->
+                        {% if enrollment.course_total > 0 %}
+                        <div class="progress mb-2" style="height: 10px;">
+                            {% widthratio enrollment.total_paid enrollment.course_total 100 as payment_percentage %}
+                            <div class="progress-bar {% if enrollment.is_fully_paid %}bg-success{% else %}bg-info{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ payment_percentage }}%;" 
+                                 aria-valuenow="{{ payment_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Course Progress Bar -->
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ enrollment.progress }}%;" 
+                                 aria-valuenow="{{ enrollment.progress }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ enrollment.progress }}%
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <small><strong>Quiz Average:</strong> 
+                                    <span class="badge bg-info">
+                                        {% if enrollment.quiz_avg %}
+                                            {{ enrollment.quiz_avg|floatformat:1 }}%
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                <small><strong>Certificate:</strong>
+                                    {% if enrollment.course_status == 'completed' and enrollment.is_fully_paid %}
+                                        <span class="badge bg-success">Eligible</span>
+                                    {% elif enrollment.course_status == 'completed' and not enrollment.is_fully_paid %}
+                                        <span class="badge bg-warning">Payment Pending</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Not Issued</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="col-md-4">
+                                {% if enrollment.latest_payment %}
+                                <small><strong>Last Payment:</strong> 
+                                    ₹{{ enrollment.latest_payment.amount|floatformat:2 }} 
+                                    ({{ enrollment.latest_payment.paymentdate|date:"d M Y" }})
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if not forloop.last %}
+                        <hr>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No courses enrolled</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Payment History Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment History</h6>
+                    <a href="{% url 'student_payments' student.id %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Course</th>
+                                    <th>Amount</th>
+                                    <th>Mode</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments|slice:":5" %}
+                                <tr>
+                                    <td>{{ payment.paymentdate|date:"d M Y" }}</td>
+                                    <td>{{ payment.student_enrol_id.enrolled_batchid.course.coursename }}</td>
+                                    <td><strong>₹{{ payment.amount|floatformat:2 }}</strong></td>
+                                    <td>{{ payment.payment_mode|title }}</td>
+                                    <td>
+                                        {% if payment.paymentstatus == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No payment records found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
+    .card-header h6 {
+        color: white;
+        margin: 0;
+    }
+    .progress {
+        border-radius: 10px;
+        background-color: #eaecf4;
+    }
+    .badge {
+        padding: 5px 10px;
+    }
+</style>
+{% endblock %}

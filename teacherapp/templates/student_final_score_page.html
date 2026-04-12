@@ -1,0 +1,244 @@
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block main %}
+<div style="padding: 20px;">
+    <!-- Header with Back Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div>
+            <a href="{% url 'teacher_students' %}" style="color: #666; text-decoration: none; display: inline-block; margin-bottom: 10px;">
+                <i class="fas fa-arrow-left me-2"></i>Back to Students
+            </a>
+            <h1 style="font-size: 24px; font-weight: 600; color: #333; margin: 0;">Final Score Calculation</h1>
+        </div>
+    </div>
+
+    <!-- Student Info Card -->
+    <div style="background: white; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px;">
+        <div style="display: flex; align-items: center;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e6f7f9; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: #06BBCC; font-weight: 600; font-size: 18px;">
+                {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+            </div>
+            <div>
+                <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 5px 0;">{{ student.first_name }} {{ student.last_name }}</h3>
+                <p style="color: #666; margin: 0;">
+                    <span style="margin-right: 15px;"><i class="fas fa-book me-1"></i>{{ batch.course.coursename }}</span>
+                    <span><i class="fas fa-layer-group me-1"></i>Batch: {{ batch.batchname }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Marks Table -->
+    <div style="background: white; border: 1px solid #e0e0e0; margin-bottom: 25px;">
+        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa;">
+            <h6 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">
+                <i class="fas fa-file-alt me-2" style="color: #06BBCC;"></i>Assignment Marks
+            </h6>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Assignment</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Total Marks</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Obtained</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assignment_list %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 15px;">{{ item.name }}</td>
+                        <td style="padding: 15px;">{{ item.total }}</td>
+                        <td style="padding: 15px;">
+                            {% if item.graded %}
+                                <strong>{{ item.obtained }}</strong>
+                            {% elif item.submitted %}
+                                <span style="color: #ff9800;">Pending</span>
+                            {% else %}
+                                <span style="color: #999;">Not submitted</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px;">
+                            {% if item.graded %}
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #28a745; color: white;">Graded</span>
+                            {% elif item.submitted %}
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #ffc107; color: #333;">Pending</span>
+                            {% else %}
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #6c757d; color: white;">Not Submitted</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="background: #f0f7ff;">
+                        <td style="padding: 15px; font-weight: 600;">Assignment Total</td>
+                        <td style="padding: 15px; font-weight: 600;">{{ total_assignment_marks }}</td>
+                        <td style="padding: 15px; font-weight: 600; color: #06BBCC;">{{ total_assignment_obtained }}</td>
+                        <td style="padding: 15px;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Exam Marks Table -->
+    <div style="background: white; border: 1px solid #e0e0e0; margin-bottom: 25px;">
+        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0; background: #f8f9fa;">
+            <h6 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">
+                <i class="fas fa-chart-bar me-2" style="color: #00bcd4;"></i>Exam Marks
+            </h6>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Exam</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Total Marks</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Obtained</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in exam_list %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 15px;">{{ item.name }}</td>
+                        <td style="padding: 15px;">{{ item.total }}</td>
+                        <td style="padding: 15px;"><strong>{{ item.obtained }}</strong></td>
+                        <td style="padding: 15px;">
+                            {% widthratio item.obtained item.total 100 as percentage %}
+                            <span style="color: #00bcd4; font-weight: 500;">{{ percentage }}%</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 20px; text-align: center; color: #666;">No exam results found</td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="background: #f0f7ff;">
+                        <td style="padding: 15px; font-weight: 600;">Exam Total</td>
+                        <td style="padding: 15px; font-weight: 600;">{{ total_exam_marks }}</td>
+                        <td style="padding: 15px; font-weight: 600; color: #00bcd4;">{{ total_exam_obtained }}</td>
+                        <td style="padding: 15px;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Overall Summary Card -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; color: white;">
+            <div>
+                <small style="display: block; margin-bottom: 5px; opacity: 0.9;">Total Marks</small>
+                <h3 style="margin: 0; font-size: 24px;">{{ total_marks }}</h3>
+            </div>
+            <div>
+                <small style="display: block; margin-bottom: 5px; opacity: 0.9;">Total Obtained</small>
+                <h3 style="margin: 0; font-size: 24px;">{{ total_obtained }}</h3>
+            </div>
+            <div>
+                <small style="display: block; margin-bottom: 5px; opacity: 0.9;">Overall Percentage</small>
+                <h3 style="margin: 0; font-size: 24px;">{{ overall_percentage }}%</h3>
+            </div>
+            <div>
+                <small style="display: block; margin-bottom: 5px; opacity: 0.9;">Status</small>
+                <h3 style="margin: 0; font-size: 24px;">
+                    {% if overall_percentage >= 40 %}
+                        <span style="color: #4caf50;">PASS</span>
+                    {% else %}
+                        <span style="color: #f44336;">FAIL</span>
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Mark Upload Section -->
+    <div style="background: white; border: 1px solid #e0e0e0; padding: 25px;">
+        <h6 style="font-size: 16px; font-weight: 600; color: #333; margin: 0 0 15px 0;">
+            <i class="fas fa-upload me-2" style="color: #9c27b0;"></i>Upload Final Mark
+        </h6>
+        
+        {% if final_exists %}
+            <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <p style="margin: 0; color: #155724;">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Final mark already uploaded: <strong>{{ final_mark }}</strong>
+                </p>
+            </div>
+        {% endif %}
+        
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Final Score</label>
+                <input type="number" id="finalMarkInput" value="{{ total_obtained }}" 
+                       min="0" max="{{ total_marks }}"
+                       style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <small style="color: #666; display: block; margin-top: 5px;">Maximum: {{ total_marks }}</small>
+            </div>
+            <div style="margin-top: 20px;">
+                {% if final_exists %}
+                    <button onclick="updateFinalMark({{ enrollment.id }})" 
+                            style="padding: 10px 30px; background: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-sync-alt me-2"></i>Update Final Mark
+                    </button>
+                {% else %}
+                    <button onclick="uploadFinalMark({{ enrollment.id }})" 
+                            style="padding: 10px 30px; background: #9c27b0; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        <i class="fas fa-upload me-2"></i>Upload Final Mark
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function uploadFinalMark(enrollmentId) {
+        const finalMark = document.getElementById('finalMarkInput').value;
+        const totalMarks = {{ total_marks }};
+        
+        if (!finalMark) {
+            alert('Please enter final mark');
+            return;
+        }
+        
+        if (parseInt(finalMark) < 0 || parseInt(finalMark) > totalMarks) {
+            alert(`Final mark must be between 0 and ${totalMarks}`);
+            return;
+        }
+        
+        fetch('/save-final-mark/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                enrollment_id: enrollmentId,
+                final_mark: parseInt(finalMark)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Final mark uploaded successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error uploading final mark');
+        });
+    }
+    
+    function updateFinalMark(enrollmentId) {
+        if (confirm('Are you sure you want to update the final mark?')) {
+            uploadFinalMark(enrollmentId);
+        }
+    }
+</script>
+{% endblock %}

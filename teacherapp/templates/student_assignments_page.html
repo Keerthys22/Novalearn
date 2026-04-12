@@ -1,0 +1,306 @@
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block main %}
+<div style="padding: 20px;">
+    <!-- Header with Back Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div>
+            <a href="{% url 'teacher_students' %}" style="color: #666; text-decoration: none; display: inline-block; margin-bottom: 10px;">
+                <i class="fas fa-arrow-left me-2"></i>Back to Students
+            </a>
+            <h1 style="font-size: 24px; font-weight: 600; color: #333; margin: 0;">Student Assignments</h1>
+        </div>
+    </div>
+
+    <!-- Student Info Card -->
+    <div style="background: white; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px;">
+        <div style="display: flex; align-items: center;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e6f7f9; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: #06BBCC; font-weight: 600; font-size: 18px;">
+                {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+            </div>
+            <div>
+                <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 5px 0;">{{ student.first_name }} {{ student.last_name }}</h3>
+                <p style="color: #666; margin: 0;">
+                    <span style="margin-right: 15px;"><i class="fas fa-book me-1"></i>{{ batch.course.coursename }}</span>
+                    <span><i class="fas fa-layer-group me-1"></i>Batch: {{ batch.batchname }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignments Table -->
+    <div style="background: white; border: 1px solid #e0e0e0;">
+        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0;">
+            <h6 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">Assignment Submissions</h6>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Assignment</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Due Date</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Submitted Date</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Status</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Marks</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assignment_list %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 15px;">Assignment {{ forloop.counter }}</td>
+                        <td style="padding: 15px;">{{ item.assignment.duedate|date:"d M Y" }}</td>
+                        <td style="padding: 15px;">
+                            {% if item.submitted %}
+                                {{ item.submission.submitteddate|date:"d M Y" }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px;">
+                            {% if item.submitted %}
+                                {% if item.submission.assigned_marks %}
+                                    <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #28a745; color: white;">Graded</span>
+                                {% else %}
+                                    <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #ffc107; color: #333;">Submitted</span>
+                                {% endif %}
+                            {% else %}
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #6c757d; color: white;">Not Submitted</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px;">
+                            {% if item.submitted and item.submission.assigned_marks %}
+                                <strong>{{ item.submission.assigned_marks }}/{{ item.assignment.totalmarks }}</strong>
+                            {% elif item.submitted %}
+                                <span style="color: #ff9800;">Not graded</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px;">
+                            {% if item.submitted %}
+                                {% if item.submission.assigned_marks %}
+                                    <button class="edit-mark-btn" 
+                                            data-submission-id="{{ item.submission.id }}"
+                                            data-current-marks="{{ item.submission.assigned_marks }}"
+                                            data-total-marks="{{ item.assignment.totalmarks }}"
+                                            data-assignment-name="Assignment {{ forloop.counter }}"
+                                            data-file-url="{% if item.submission.assignmentuploaded %}{{ item.submission.assignmentuploaded.url }}{% endif %}"
+                                            style="padding: 5px 10px; background: #06BBCC; color: white; border: none; border-radius: 3px; font-size: 12px; cursor: pointer; margin-right: 5px;">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                {% else %}
+                                    <button class="add-mark-btn" 
+                                            data-submission-id="{{ item.submission.id }}"
+                                            data-total-marks="{{ item.assignment.totalmarks }}"
+                                            data-assignment-name="Assignment {{ forloop.counter }}"
+                                            data-file-url="{% if item.submission.assignmentuploaded %}{{ item.submission.assignmentuploaded.url }}{% endif %}"
+                                            style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 12px; cursor: pointer; margin-right: 5px;">
+                                        <i class="fas fa-plus me-1"></i>Add Mark
+                                    </button>
+                                {% endif %}
+                                {% if item.submission.assignmentuploaded %}
+                                    <a href="{{ item.submission.assignmentuploaded.url }}" target="_blank" 
+                                       style="padding: 5px 10px; background: #17a2b8; color: white; border-radius: 3px; text-decoration: none; font-size: 12px; display: inline-block;">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </a>
+                                {% else %}
+                                    <span style="color: #999; font-size: 12px;">No file</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: #666;">
+                            <i class="fas fa-file-alt fa-3x" style="color: #ddd; margin-bottom: 15px;"></i>
+                            <p>No assignments found for this batch</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Marks Modal -->
+<div id="marksModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: relative; width: 90%; max-width: 500px; margin: 50px auto;">
+        <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="modalTitle" style="font-size: 18px; font-weight: 600; margin: 0;">Add Marks</h3>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Assignment:</label>
+                    <p id="assignmentName" style="margin: 0; color: #333;"></p>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500;">Student Answer:</label>
+                    <a id="studentFileLink" href="#" target="_blank" style="color: #06BBCC; text-decoration: none;">
+                        <i class="fas fa-file me-1"></i>Click to view submitted file
+                    </a>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="marksInput" style="display: block; margin-bottom: 5px; font-weight: 500;">Enter Marks:</label>
+                    <input type="number" id="marksInput" min="0" step="1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <small id="marksHint" style="color: #666; display: block; margin-top: 5px;"></small>
+                </div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid #e0e0e0; text-align: right;">
+                <button onclick="closeModal()" style="padding: 8px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; margin-right: 10px; cursor: pointer;">Cancel</button>
+                <button onclick="saveMarks()" style="padding: 8px 20px; background: #06BBCC; color: white; border: none; border-radius: 4px; cursor: pointer;">Save Marks</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSubmissionId = null;
+    let currentTotalMarks = 0;
+
+    // Wait for DOM to load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, setting up event listeners');
+        
+        // Add Mark button click
+        document.querySelectorAll('.add-mark-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                console.log('Add mark button clicked');
+                currentSubmissionId = this.dataset.submissionId;
+                currentTotalMarks = parseInt(this.dataset.totalMarks);
+                const assignmentName = this.dataset.assignmentName;
+                const fileUrl = this.dataset.fileUrl;
+                
+                document.getElementById('modalTitle').textContent = 'Add Marks';
+                document.getElementById('assignmentName').textContent = assignmentName;
+                document.getElementById('marksHint').textContent = `Maximum marks: ${currentTotalMarks}`;
+                document.getElementById('marksInput').value = '';
+                document.getElementById('marksInput').max = currentTotalMarks;
+                
+                if (fileUrl) {
+                    document.getElementById('studentFileLink').href = fileUrl;
+                } else {
+                    document.getElementById('studentFileLink').href = '#';
+                }
+                
+                document.getElementById('marksModal').style.display = 'block';
+            });
+        });
+
+        // Edit Mark button click
+        document.querySelectorAll('.edit-mark-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                console.log('Edit mark button clicked');
+                currentSubmissionId = this.dataset.submissionId;
+                currentTotalMarks = parseInt(this.dataset.totalMarks);
+                const currentMarks = this.dataset.currentMarks;
+                const assignmentName = this.dataset.assignmentName;
+                const fileUrl = this.dataset.fileUrl;
+                
+                document.getElementById('modalTitle').textContent = 'Edit Marks';
+                document.getElementById('assignmentName').textContent = assignmentName;
+                document.getElementById('marksHint').textContent = `Maximum marks: ${currentTotalMarks}`;
+                document.getElementById('marksInput').value = currentMarks;
+                document.getElementById('marksInput').max = currentTotalMarks;
+                
+                if (fileUrl) {
+                    document.getElementById('studentFileLink').href = fileUrl;
+                } else {
+                    document.getElementById('studentFileLink').href = '#';
+                }
+                
+                document.getElementById('marksModal').style.display = 'block';
+            });
+        });
+    });
+
+    function closeModal() {
+        document.getElementById('marksModal').style.display = 'none';
+    }
+
+    function saveMarks() {
+        const marks = document.getElementById('marksInput').value;
+        
+        if (!marks) {
+            alert('Please enter marks');
+            return;
+        }
+        
+        if (parseInt(marks) > currentTotalMarks) {
+            alert(`Marks cannot exceed ${currentTotalMarks}`);
+            return;
+        }
+        
+        if (parseInt(marks) < 0) {
+            alert('Marks cannot be negative');
+            return;
+        }
+        
+        console.log('Saving marks:', marks, 'for submission:', currentSubmissionId);
+        
+        // Send AJAX request to save marks
+        fetch('/save-assignment-marks/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                submission_id: currentSubmissionId,
+                marks: parseInt(marks)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response:', data);
+            if (data.success) {
+                alert('Marks saved successfully');
+                location.reload(); // Reload page to show updated marks
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error saving marks: ' + error);
+        });
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('marksModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+
+<style>
+    /* Modal animation */
+    #marksModal {
+        animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Button hover effects */
+    .add-mark-btn:hover, .edit-mark-btn:hover {
+        opacity: 0.9;
+    }
+    
+    /* Table row hover */
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+{% endblock %}

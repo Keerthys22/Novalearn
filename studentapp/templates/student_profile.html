@@ -1,0 +1,428 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h6 class="section-title bg-white text-center text-primary px-3">My Profile</h6>
+            <h1 class="mb-5">Student Information</h1>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fa fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-5">
+            <!-- Profile Information Column -->
+            <div class="col-lg-7 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="bg-light rounded p-5 shadow-sm">
+                    <h4 class="mb-4 text-primary">Personal Details</h4>
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="row g-3">
+                            <!-- Profile Picture -->
+                            <div class="col-12 text-center mb-4">
+                                <div class="position-relative d-inline-block">
+                                    {% if student.profile_pic %}
+                                    <img src="{{ student.profile_pic.url }}" alt="{{ student.first_name }}" 
+                                         class="rounded-circle border border-3 border-primary" 
+                                         style="width: 150px; height: 150px; object-fit: cover;">
+                                    {% else %}
+                                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto border border-3 border-white" 
+                                         style="width: 150px; height: 150px;">
+                                        <span class="text-white display-4">{{ student.first_name|first|upper }}{{ student.last_name|first|upper }}</span>
+                                    </div>
+                                    {% endif %}
+                                    <label for="profile_pic" class="position-absolute bottom-0 end-0 bg-primary rounded-circle p-2" style="cursor: pointer;">
+                                        <i class="fas fa-camera text-white"></i>
+                                    </label>
+                                    <input type="file" id="profile_pic" name="profile_pic" class="d-none" accept="image/*">
+                                </div>
+                            </div>
+                            
+                            <!-- Email (Read Only) -->
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control bg-white" id="email" 
+                                           value="{{ student.login.email }}" readonly disabled>
+                                    <label for="email">Email Address</label>
+                                    <small class="text-muted">Email cannot be changed</small>
+                                </div>
+                            </div>
+                            
+                            <!-- First Name -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                                           value="{{ student.first_name }}" required>
+                                    <label for="first_name">First Name</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Last Name -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                                           value="{{ student.last_name }}" required>
+                                    <label for="last_name">Last Name</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Phone Number -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phno" name="phno" 
+                                           value="{{ student.phno }}" required>
+                                    <label for="phno">Phone Number</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Date of Birth -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="dob" name="dob" 
+                                           value="{{ student.dob|date:'Y-m-d' }}" required>
+                                    <label for="dob">Date of Birth</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Gender -->
+                            <div class="col-md-12">
+                                <div class="form-floating">
+                                    <select class="form-control" id="gender" name="gender" required>
+                                        <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                    <label for="gender">Gender</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Educational Background -->
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="educational_background" name="educational_background" 
+                                              style="height: 100px" required>{{ student.educational_background }}</textarea>
+                                    <label for="educational_background">Educational Background</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-3" type="submit">
+                                    <i class="fa fa-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Password Change Column -->
+            <div class="col-lg-5 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="bg-light rounded p-5 shadow-sm">
+                    <h4 class="mb-4 text-primary">Change Password</h4>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+                        
+                        <div class="row g-3">
+                            <!-- Current Password -->
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                    <label for="current_password">Current Password</label>
+                                </div>
+                            </div>
+                            
+                            <!-- New Password -->
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                    <label for="new_password">New Password</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Confirm Password -->
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                    <label for="confirm_password">Confirm New Password</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Password Requirements -->
+                            <div class="col-12">
+                                <div class="bg-white p-3 rounded">
+                                    <h6 class="mb-3"><i class="fa fa-lock text-primary me-2"></i>Password Requirements:</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2" id="req-length">
+                                            <i class="fa fa-circle text-secondary me-2"></i>At least 6 characters
+                                        </li>
+                                        <li class="mb-2" id="req-match">
+                                            <i class="fa fa-circle text-secondary me-2"></i>Passwords match
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Password Strength -->
+                            <div class="col-12">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="strengthBar"></div>
+                                </div>
+                                <small class="text-muted" id="strengthText">Enter new password</small>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="col-12">
+                                <button class="btn btn-warning w-100 py-3" type="submit" id="changePasswordBtn">
+                                    <i class="fa fa-key me-2"></i>Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Account Info Card -->
+                <div class="bg-primary rounded p-4 mt-4 text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-info-circle fa-3x me-3"></i>
+                        <div>
+                            <h5 class="text-white mb-1">Account Information</h5>
+                            <p class="mb-0 small">Member since: {{ student.created_at|date:"F d, Y" }}</p>
+                            <p class="mb-0 small">Status: <span class="badge bg-success">{{ student.status }}</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Additional styles matching eLEARNING template */
+    .section-title {
+        position: relative;
+        display: inline-block;
+        text-transform: uppercase;
+    }
+    
+    .section-title::before {
+        position: absolute;
+        content: "";
+        width: 45px;
+        height: 2px;
+        top: 50%;
+        left: -55px;
+        margin-top: -1px;
+        background: #06BBCC;
+    }
+    
+    .section-title::after {
+        position: absolute;
+        content: "";
+        width: 45px;
+        height: 2px;
+        top: 50%;
+        right: -55px;
+        margin-top: -1px;
+        background: #06BBCC;
+    }
+    
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: #06BBCC;
+        font-weight: 500;
+    }
+    
+    .form-floating > .form-control:focus {
+        border-color: #06BBCC;
+        box-shadow: 0 0 0 0.2rem rgba(6, 187, 204, 0.25);
+    }
+    
+    .btn-primary {
+        background-color: #06BBCC;
+        border-color: #06BBCC;
+    }
+    
+    .btn-primary:hover {
+        background-color: #05a5b5;
+        border-color: #0599a8;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #1a202c;
+    }
+    
+    .btn-warning:hover {
+        background-color: #ffca2c;
+        border-color: #ffc720;
+    }
+    
+    .bg-primary {
+        background-color: #06BBCC !important;
+    }
+    
+    .text-primary {
+        color: #06BBCC !important;
+    }
+    
+    .border-primary {
+        border-color: #06BBCC !important;
+    }
+    
+    .progress-bar.bg-success {
+        background-color: #28a745 !important;
+    }
+    
+    .shadow-sm {
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+    
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    /* Animation for password strength */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .wow.fadeInUp {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    /* Profile picture hover effect */
+    .position-relative:hover .bg-primary {
+        background-color: #05a5b5 !important;
+        transition: background-color 0.3s;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const newPassword = document.getElementById('new_password');
+        const confirmPassword = document.getElementById('confirm_password');
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthText = document.getElementById('strengthText');
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        
+        // Password strength checker
+        function checkPasswordStrength() {
+            const password = newPassword.value;
+            let strength = 0;
+            
+            // Check length
+            const hasLength = password.length >= 6;
+            
+            if (hasLength) strength += 50;
+            
+            // Update requirement indicators
+            document.getElementById('req-length').innerHTML = hasLength ? 
+                '<i class="fa fa-check-circle text-success me-2"></i>At least 6 characters' : 
+                '<i class="fa fa-circle text-secondary me-2"></i>At least 6 characters';
+            
+            // Update strength bar
+            strengthBar.style.width = strength + '%';
+            
+            if (strength < 50) {
+                strengthBar.className = 'progress-bar bg-danger';
+                strengthText.textContent = 'Weak password';
+            } else {
+                strengthBar.className = 'progress-bar bg-success';
+                strengthText.textContent = 'Strong password';
+            }
+            
+            checkMatch();
+        }
+        
+        function checkMatch() {
+            const match = newPassword.value && confirmPassword.value && 
+                         newPassword.value === confirmPassword.value;
+            
+            document.getElementById('req-match').innerHTML = match ? 
+                '<i class="fa fa-check-circle text-success me-2"></i>Passwords match' : 
+                '<i class="fa fa-circle text-secondary me-2"></i>Passwords match';
+        }
+        
+        if (newPassword) {
+            newPassword.addEventListener('input', checkPasswordStrength);
+        }
+        
+        if (confirmPassword) {
+            confirmPassword.addEventListener('input', checkMatch);
+        }
+        
+        // Form validation for password change
+        const passwordForm = document.querySelector('form input[name="action"][value="change_password"]')?.closest('form');
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', function(e) {
+                const current = document.getElementById('current_password').value;
+                const newPwd = document.getElementById('new_password').value;
+                const confirm = document.getElementById('confirm_password').value;
+                
+                if (!current) {
+                    e.preventDefault();
+                    alert('Please enter your current password');
+                } else if (newPwd.length < 6) {
+                    e.preventDefault();
+                    alert('New password must be at least 6 characters');
+                } else if (newPwd !== confirm) {
+                    e.preventDefault();
+                    alert('New passwords do not match');
+                }
+            });
+        }
+        
+        // Profile picture preview
+        const profilePicInput = document.getElementById('profile_pic');
+        if (profilePicInput) {
+            profilePicInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.querySelector('.position-relative img');
+                        const placeholder = document.querySelector('.position-relative .rounded-circle.bg-primary');
+                        
+                        if (img) {
+                            img.src = e.target.result;
+                        } else if (placeholder) {
+                            // Replace placeholder with image
+                            const parent = placeholder.parentNode;
+                            const newImg = document.createElement('img');
+                            newImg.src = e.target.result;
+                            newImg.className = 'rounded-circle border border-3 border-primary';
+                            newImg.style.width = '150px';
+                            newImg.style.height = '150px';
+                            newImg.style.objectFit = 'cover';
+                            parent.replaceChild(newImg, placeholder);
+                        }
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,225 @@
+<!-- edit_lesson.html -->
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .content-title h2 {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .content-title p {
+        color: var(--text-light);
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .batch-info {
+        background-color: var(--primary-light);
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .batch-info i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .batch-info span {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        color: var(--text-dark);
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--primary-light);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .file-input {
+        padding: 8px;
+        border: 1px dashed var(--border-color);
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+    
+    .current-file {
+        margin-top: 5px;
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .current-file a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .current-file a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="content-header">
+    <div class="content-title">
+        <h2>Edit Lesson</h2>
+        <p>Update the lesson details</p>
+    </div>
+    <a href="{% url 'manage_recorded_classes' %}" class="btn btn-cancel">
+        <i class="fas fa-arrow-left"></i> Back to Lessons
+    </a>
+</div>
+
+<!-- Batch Info -->
+<div class="batch-info">
+    <i class="fas fa-users"></i>
+    <span>Batch: {{ request.session.batch_name|default:"Batch" }}</span>
+</div>
+
+<div class="form-container">
+    <h3 class="form-title">Edit Lesson: {{ lesson.lessontitle }}</h3>
+    <form method="POST" action="{% url 'edit_lesson' lesson.id %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="modulenumber">Module Number *</label>
+            <input type="number" class="form-control" id="modulenumber" name="modulenumber" 
+                   value="{{ lesson.modulenumber }}" required min="1">
+        </div>
+        
+        <div class="form-group">
+            <label for="moduletitle">Module Title *</label>
+            <input type="text" class="form-control" id="moduletitle" name="moduletitle" 
+                   value="{{ lesson.moduletitle }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="lessontitle">Lesson Title *</label>
+            <input type="text" class="form-control" id="lessontitle" name="lessontitle" 
+                   value="{{ lesson.lessontitle }}" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>Current PDF Notes</label>
+                <div class="current-file">
+                    {% if lesson.pdfnotes %}
+                    <a href="{{ lesson.pdfnotes.url }}" target="_blank">
+                        <i class="fas fa-file-pdf"></i> {{ lesson.pdfnotes.name|slice:"20:" }}
+                    </a>
+                    {% else %}
+                    <span class="text-muted">No PDF uploaded</span>
+                    {% endif %}
+                </div>
+                <label for="pdfnotes" style="margin-top: 10px;">Upload New PDF (Optional)</label>
+                <input type="file" class="form-control file-input" id="pdfnotes" name="pdfnotes" accept=".pdf">
+                <small class="text-muted">Leave empty to keep current file</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Current Video</label>
+                <div class="current-file">
+                    {% if lesson.videos %}
+                    <a href="{{ lesson.videos.url }}" target="_blank">
+                        <i class="fas fa-video"></i> {{ lesson.videos.name|slice:"20:" }}
+                    </a>
+                    {% else %}
+                    <span class="text-muted">No video uploaded</span>
+                    {% endif %}
+                </div>
+                <label for="videos" style="margin-top: 10px;">Upload New Video (Optional)</label>
+                <input type="file" class="form-control file-input" id="videos" name="videos" accept="video/*">
+                <small class="text-muted">Leave empty to keep current file</small>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'manage_recorded_classes' %}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Lesson
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,270 @@
+<!-- add_assignment.html -->
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .content-title h2 {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .content-title p {
+        color: var(--text-light);
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .batch-info {
+        background-color: var(--primary-light);
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .batch-info i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .batch-info span {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        color: var(--text-dark);
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--primary-light);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-top: 5px;
+    }
+    
+    .alert {
+        padding: 12px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+    
+    .file-info {
+        background-color: #e7f3ff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .file-info i {
+        color: var(--primary-color);
+        margin-right: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="content-header">
+    <div class="content-title">
+        <h2>Add New Assignment</h2>
+        <p>Create a new assignment for your students</p>
+    </div>
+    <a href="{% url 'manage_assignments' %}" class="btn btn-cancel">
+        <i class="fas fa-arrow-left"></i> Back to Assignments
+    </a>
+</div>
+
+<!-- Display Messages -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Batch Info -->
+<div class="batch-info">
+    <i class="fas fa-users"></i>
+    <span>Batch: {{ batch.batchname }} ({{ batch.batchcode }})</span>
+</div>
+
+<div class="form-container">
+    <h3 class="form-title">Assignment Details</h3>
+    
+    <!-- File Upload Info -->
+    <div class="file-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>File Upload:</strong> You can upload PDF, DOC, DOCX, TXT, JPG, PNG files (Max 10MB). This field is optional.
+    </div>
+    
+    <form method="POST" action="{% url 'add_assignment' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Hidden batch field -->
+        <input type="hidden" name="batch" value="{{ batch.id }}">
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="uploaddate">Upload Date *</label>
+                <input type="date" class="form-control" id="uploaddate" name="uploaddate" 
+                       value="{% now 'Y-m-d' %}" required>
+                <div class="help-text">Date when assignment is posted</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="duedate">Due Date *</label>
+                <input type="date" class="form-control" id="duedate" name="duedate" required>
+                <div class="help-text">Last date for submission</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="totalmarks">Total Marks *</label>
+            <input type="number" class="form-control" id="totalmarks" name="totalmarks" 
+                   min="1" max="1000" required placeholder="Enter total marks">
+            <div class="help-text">Maximum marks for this assignment</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="assignmentupload">Assignment File (Optional)</label>
+            <input type="file" class="form-control" id="assignmentupload" name="assignmentupload" 
+                   accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+            <div class="help-text">Upload assignment file (Optional - Max 10MB)</div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{% url 'manage_assignments' %}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Create Assignment
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set today's date as default for upload date (already set by Django)
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0];
+        
+        // Set minimum date for due date to today
+        document.getElementById('duedate').setAttribute('min', todayFormatted);
+        
+        // Set due date to 7 days from today by default
+        const nextWeek = new Date(today);
+        nextWeek.setDate(today.getDate() + 7);
+        const nextWeekFormatted = nextWeek.toISOString().split('T')[0];
+        document.getElementById('duedate').value = nextWeekFormatted;
+        
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const uploadDate = new Date(document.getElementById('uploaddate').value);
+            const dueDate = new Date(document.getElementById('duedate').value);
+            const totalMarks = document.getElementById('totalmarks').value;
+            
+            // Check if due date is after upload date
+            if (dueDate <= uploadDate) {
+                e.preventDefault();
+                alert('Error: Due date must be after upload date');
+                return false;
+            }
+            
+            // Check marks are positive
+            if (!totalMarks || parseInt(totalMarks) <= 0) {
+                e.preventDefault();
+                alert('Error: Total marks must be a positive number');
+                return false;
+            }
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %}

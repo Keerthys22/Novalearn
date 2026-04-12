@@ -1,0 +1,278 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">My Courses</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_classes' batch.id %}">{{ batch.course.coursename }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'payment_details' batch.id %}">Payment Details</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Make Payment</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-credit-card me-2"></i>
+                            Make Payment
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Payment Summary -->
+                        <div class="alert alert-info mb-4">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <small class="text-muted">Course</small>
+                                    <h6>{{ batch.course.coursename }}</h6>
+                                    <small class="text-muted">Batch</small>
+                                    <h6>{{ batch.batchname }}</h6>
+                                </div>
+                                <div class="col-sm-6 text-end">
+                                    <small class="text-muted">Amount to Pay</small>
+                                    <h2 class="text-primary">₹ {{ amount|floatformat:2 }}</h2>
+                                    <small class="text-muted">Balance Amount</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Progress -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Payment Progress</span>
+                                <span class="fw-bold">{{ payment_percentage|floatformat:1 }}%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ payment_percentage }}%;" 
+                                     aria-valuenow="{{ payment_percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1 small">
+                                <span>Paid: ₹ {{ total_paid|floatformat:2 }}</span>
+                                <span>Total: ₹ {{ total_fee|floatformat:2 }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Payment Form -->
+                        <form method="POST" action="{% url 'process_balance_payment' batch.id %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Payment Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="text" class="form-control" value="{{ amount|floatformat:2 }}" readonly>
+                                </div>
+                                <input type="hidden" name="amount" value="{{ amount }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Payment Method</label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check card-option p-3 border rounded" onclick="selectPayment('card')">
+                                            <input class="form-check-input" type="radio" name="payment_mode" id="card" value="card" checked>
+                                            <label class="form-check-label" for="card">
+                                                <i class="fas fa-credit-card fa-2x text-primary me-2"></i>
+                                                <div>
+                                                    <strong>Credit/Debit Card</strong>
+                                                    <small class="d-block text-muted">Pay via Visa, Mastercard, RuPay</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check card-option p-3 border rounded" onclick="selectPayment('online')">
+                                            <input class="form-check-input" type="radio" name="payment_mode" id="online" value="online">
+                                            <label class="form-check-label" for="online">
+                                                <i class="fas fa-mobile-alt fa-2x text-success me-2"></i>
+                                                <div>
+                                                    <strong>Online Banking</strong>
+                                                    <small class="d-block text-muted">UPI, Net Banking, Wallet</small>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Details (shown when card is selected) -->
+                            <div id="cardDetails" class="mb-3">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Card Number</label>
+                                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456" 
+                                               pattern="[0-9]{16}" maxlength="19">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Expiry Date</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">CVV</label>
+                                        <input type="password" class="form-control" placeholder="***" maxlength="3">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Cardholder Name</label>
+                                        <input type="text" class="form-control" placeholder="Name on Card">
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-lock me-1"></i>Your payment information is secure and encrypted
+                                </small>
+                            </div>
+
+                            <!-- Online Banking Details (hidden by default) -->
+                            <div id="onlineDetails" class="mb-3" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Select Payment App</label>
+                                        <select class="form-select">
+                                            <option value="">Choose payment method...</option>
+                                            <option value="gpay">Google Pay</option>
+                                            <option value="phonepe">PhonePe</option>
+                                            <option value="paytm">Paytm</option>
+                                            <option value="bhim">BHIM UPI</option>
+                                            <option value="netbanking">Net Banking</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">UPI ID / Mobile Number</label>
+                                        <input type="text" class="form-control" placeholder="example@okhdfcbank or mobile number">
+                                    </div>
+                                </div>
+                                <div class="mt-3 p-3 bg-light rounded">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-qrcode fa-2x text-dark me-3"></i>
+                                        <div>
+                                            <strong>Scan & Pay with UPI</strong>
+                                            <p class="small text-muted mb-0">Scan any UPI QR code using your app</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="payButton">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Pay ₹ {{ amount|floatformat:2 }} Securely
+                                </button>
+                                <a href="{% url 'payment_details' batch.id %}" class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <img src="https://cdn.iconscout.com/icon/free/png-256/visa-3-226460.png" alt="Visa" style="height: 30px; margin: 0 5px; opacity: 0.6;">
+                                <img src="https://cdn.iconscout.com/icon/free/png-256/mastercard-3-226437.png" alt="Mastercard" style="height: 30px; margin: 0 5px; opacity: 0.6;">
+                                <img src="https://cdn.iconscout.com/icon/free/png-256/rupay-1-226451.png" alt="RuPay" style="height: 30px; margin: 0 5px; opacity: 0.6;">
+                                <img src="https://cdn.iconscout.com/icon/free/png-256/upi-1-226452.png" alt="UPI" style="height: 30px; margin: 0 5px; opacity: 0.6;">
+                                <small class="d-block text-muted mt-2">
+                                    <i class="fas fa-shield-alt me-1"></i>256-bit SSL Secure Payment
+                                </small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <small class="text-muted">
+                            <strong>Terms & Conditions:</strong><br>
+                            • This payment is for the course fee of {{ batch.course.coursename }}<br>
+                            • The payment is non-refundable once processed<br>
+                            • A receipt will be generated after successful payment<br>
+                            • For any issues, contact support@example.com
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function selectPayment(method) {
+        if (method === 'card') {
+            document.getElementById('cardDetails').style.display = 'block';
+            document.getElementById('onlineDetails').style.display = 'none';
+            document.getElementById('card').checked = true;
+        } else {
+            document.getElementById('cardDetails').style.display = 'none';
+            document.getElementById('onlineDetails').style.display = 'block';
+            document.getElementById('online').checked = true;
+        }
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var payButton = document.getElementById('payButton');
+        payButton.disabled = true;
+        payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing Payment...';
+        
+        // Simulate payment processing
+        setTimeout(() => {
+            this.submit();
+        }, 2000);
+    });
+</script>
+
+<style>
+    .card-option {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .card-option:hover {
+        background-color: #f8f9fa;
+        border-color: #0d6efd !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .card-option input[type="radio"]:checked + label {
+        color: #0d6efd;
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .card-option .form-check-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .progress {
+        border-radius: 10px;
+    }
+    
+    .input-group-text {
+        background-color: #e9ecef;
+    }
+    
+    img {
+        filter: grayscale(100%);
+        transition: filter 0.3s ease;
+    }
+    
+    img:hover {
+        filter: grayscale(0%);
+    }
+</style>
+{% endblock %}

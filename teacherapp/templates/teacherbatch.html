@@ -1,0 +1,994 @@
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    /* Reset and Base Styles */
+    .main-content {
+        background-color: #f5f7fa;
+        min-height: 100vh;
+    }
+    
+    /* Debug Panel */
+    .debug-panel {
+        background: #f8f9fa;
+        border-left: 4px solid #dc3545;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 13px;
+    }
+    
+    .debug-panel h5 {
+        color: #dc3545;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .debug-info {
+        background: #e9ecef;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+    
+    .debug-row {
+        display: flex;
+        margin-bottom: 5px;
+    }
+    
+    .debug-label {
+        font-weight: bold;
+        min-width: 180px;
+        color: #495057;
+    }
+    
+    .debug-value {
+        color: #212529;
+    }
+    
+    /* Welcome Section */
+    .welcome-section {
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .teacher-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 3px solid white;
+        margin-right: 20px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .teacher-avatar i {
+        font-size: 30px;
+    }
+    
+    .teacher-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .welcome-text h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .welcome-text p {
+        margin: 5px 0 0;
+        opacity: 0.9;
+        font-size: 14px;
+    }
+    
+    /* Stats Container */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card-custom {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s;
+    }
+    
+    .stat-card-custom:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon-custom {
+        width: 60px;
+        height: 60px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        color: white;
+        font-size: 24px;
+    }
+    
+    .stat-content-custom h3 {
+        font-size: 28px;
+        margin: 0 0 5px;
+        color: #333;
+    }
+    
+    .stat-content-custom p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    /* Batch Cards Section */
+    .section-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-title i {
+        margin-right: 10px;
+        color: #06BBCC;
+    }
+    
+    /* Batch Cards Grid */
+    .batch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .batch-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .batch-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    
+    .batch-header {
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        color: white;
+        padding: 15px;
+    }
+    
+    .batch-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .batch-title h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    
+    .batch-code {
+        background: rgba(255,255,255,0.2);
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .batch-stream {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+    
+    .batch-body {
+        padding: 20px;
+    }
+    
+    .batch-info {
+        margin-bottom: 20px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    
+    .info-label {
+        color: #666;
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .batch-actions {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .action-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .btn-primary-custom {
+        background: #06BBCC;
+        color: white;
+        border: none;
+    }
+    
+    .btn-primary-custom:hover {
+        background: #04a5b5;
+    }
+    
+    .btn-secondary-custom {
+        background: #f8f9fa;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+    
+    .btn-secondary-custom:hover {
+        background: #e9ecef;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin: 20px 0;
+    }
+    
+    .empty-state i {
+        font-size: 60px;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h3 {
+        color: #666;
+        margin-bottom: 10px;
+        font-size: 20px;
+    }
+    
+    .empty-state p {
+        color: #999;
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+    
+    /* Quick Stats */
+    .quick-stats {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-top: 30px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .quick-stat-card {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .quick-stat-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .quick-stat-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        margin: 0 auto 15px;
+    }
+    
+    .quick-stat-content h4 {
+        font-size: 28px;
+        margin: 0 0 5px;
+        color: #333;
+    }
+    
+    .quick-stat-content p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+        .batch-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .batch-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .batch-actions {
+            flex-direction: column;
+        }
+        
+        .welcome-section {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .teacher-avatar {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+        
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<!-- Debug Information -->
+{% if debug_mode %}
+<div class="debug-panel">
+    <h5><i class="fas fa-bug me-2"></i>Debug Information</h5>
+    <div class="debug-info">
+        <div class="debug-row">
+            <span class="debug-label">Teacher ID (Session):</span>
+            <span class="debug-value">{{ teacher_id }}</span>
+        </div>
+        <div class="debug-row">
+            <span class="debug-label">Teacher Name:</span>
+            <span class="debug-value">{{ teacher.firstname }} {{ teacher.lastname }}</span>
+        </div>
+        <div class="debug-row">
+            <span class="debug-label">Total Batches Found:</span>
+            <span class="debug-value">{{ total_batches }}</span>
+        </div>
+        <div class="debug-row">
+            <span class="debug-label">Database Query Results:</span>
+            <span class="debug-value">
+                {% if batch_list %}
+                    {{ batch_list|length }} batch{{ batch_list|length|pluralize:"es" }} found
+                {% else %}
+                    No batches found in query results
+                {% endif %}
+            </span>
+        </div>
+        <div class="debug-row">
+            <span class="debug-label">Session Status:</span>
+            <span class="debug-value">
+                {% if request.session.teacher_id %}
+                    <span class="text-success">Active</span>
+                {% else %}
+                    <span class="text-danger">No session found</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <button class="btn btn-sm btn-outline-danger" onclick="runDebugChecks()">
+        <i class="fas fa-search me-1"></i> Run Debug Checks
+    </button>
+    <button class="btn btn-sm btn-outline-info ms-2" onclick="clearDebugPanel()">
+        <i class="fas fa-times me-1"></i> Hide Debug
+    </button>
+</div>
+{% endif %}
+
+<!-- Welcome Section -->
+<div class="welcome-section">
+    <div class="teacher-avatar">
+        {% if teacher.profilepic %}
+            <img src="{{ teacher.profilepic.url }}" alt="{{ teacher.firstname }}">
+        {% else %}
+            <i class="fas fa-user"></i>
+        {% endif %}
+    </div>
+    <div class="welcome-text">
+        <h1>Welcome, {{ teacher.firstname }} {{ teacher.lastname }}!</h1>
+        <p>{{ teacher.qualification }} • {{ teacher.department.stream_name }} Department</p>
+        <small style="font-size: 12px; opacity: 0.8;">Teacher ID: {{ teacher_id }}</small>
+    </div>
+</div>
+
+<!-- Stats Container -->
+<div class="stats-container">
+    <div class="stat-card-custom">
+        <div class="stat-icon-custom">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-content-custom">
+            <h3>{{ total_batches }}</h3>
+            <p>Total Batches</p>
+        </div>
+    </div>
+    
+    <div class="stat-card-custom">
+        <div class="stat-icon-custom">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="stat-content-custom">
+            <h3>{{ teacher.experienceyear }}</h3>
+            <p>Years Experience</p>
+        </div>
+    </div>
+    
+    <div class="stat-card-custom">
+        <div class="stat-icon-custom">
+            <i class="fas fa-university"></i>
+        </div>
+        <div class="stat-content-custom">
+            <h3>{{ teacher.department.stream_name }}</h3>
+            <p>Department</p>
+        </div>
+    </div>
+    
+    <div class="stat-card-custom">
+        <div class="stat-icon-custom">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-content-custom">
+            <h3>{{ teacher.specialization|truncatechars:20 }}</h3>
+            <p>Specialization</p>
+        </div>
+    </div>
+</div>
+
+<!-- My Assigned Batches -->
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="section-title">
+            <i class="fas fa-layer-group"></i> My Assigned Batches
+            {% if batch_list %}
+            <span style="font-size: 14px; margin-left: 10px; color: #666;">
+                ({{ total_batches }} batch{{ total_batches|pluralize:"es" }})
+            </span>
+            {% endif %}
+        </h2>
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" id="batchSearch" class="form-control" placeholder="Search batches..." style="max-width: 250px;">
+            <button class="btn btn-outline-primary btn-sm" onclick="refreshPage()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+    
+    {% if batch_list %}
+    <div class="batch-grid" id="batchContainer">
+        {% for batch_info in batch_list %}
+        <div class="batch-card" data-search="{{ batch_info.batch.batchname }} {{ batch_info.batch.batchcode }} {{ batch_info.course.coursename }}">
+            <div class="batch-header">
+                <div class="batch-title">
+                    <h3>{{ batch_info.batch.batchname }}</h3>
+                    <span class="batch-code">{{ batch_info.batch.batchcode }}</span>
+                </div>
+                <div class="batch-stream">
+                    {{ batch_info.stream.stream_name }} Stream
+                </div>
+            </div>
+            
+            <div class="batch-body">
+                <div class="batch-info">
+                    <div class="info-row">
+                        <span class="info-label">Course:</span>
+                        <span class="info-value">{{ batch_info.course.coursename }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Stream Code:</span>
+                        <span class="info-value">{{ batch_info.stream.streamcode }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Duration:</span>
+                        <span class="info-value">{{ batch_info.course.durationweeks }} weeks</span>
+                    </div>
+                    {% if batch_info.course.description %}
+                    <div class="info-row">
+                        <span class="info-label">Description:</span>
+                        <span class="info-value" style="max-width: 150px; text-align: right;">
+                            {{ batch_info.course.description|truncatechars:50 }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    <div class="info-row">
+                        <span class="info-label">Assignment ID:</span>
+                        <span class="info-value">{{ batch_info.assignment_id }}</span>
+                    </div>
+                </div>
+                
+                <div class="batch-actions">
+                    <button class="action-btn btn-primary-custom" onclick="viewBatchDetails('{{ batch_info.batch.id }}', '{{ batch_info.batch.batchname }}')">
+                        <i class="fas fa-eye"></i>
+                        View Details
+                    </button>
+                   <a href="{% url 'setbatchsession' batch_info.batch.id %}" class="action-btn btn-secondary-custom" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-video"></i>
+                        Upload Content
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-layer-group"></i>
+        <h3>No Batches Assigned</h3>
+        <p>You haven't been assigned to any batches yet. Please contact the administrator.</p>
+        
+        <!-- Debug help for empty state -->
+        {% if debug_mode %}
+        <div class="mt-3 p-3 bg-light rounded">
+            <h5>Debug Help:</h5>
+            <p class="mb-1">1. Check if records exist in tbl_teacherbatch for teacher ID: {{ teacher_id }}</p>
+            <p class="mb-1">2. Verify teacher ID {{ teacher_id }} exists in tbl_teacher</p>
+            <p class="mb-0">3. Check database connection and table relationships</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Quick Stats -->
+<div class="quick-stats">
+    <h2 class="section-title">
+        <i class="fas fa-chart-bar"></i> Quick Statistics
+    </h2>
+    
+    <div class="stats-grid">
+        <div class="quick-stat-card">
+            <div class="quick-stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="quick-stat-content">
+                <h4 id="studentCount">0</h4>
+                <p>Total Students</p>
+            </div>
+        </div>
+        
+        <div class="quick-stat-card">
+            <div class="quick-stat-icon">
+                <i class="fas fa-video"></i>
+            </div>
+            <div class="quick-stat-content">
+                <h4 id="classCount">0</h4>
+                <p>Recorded Classes</p>
+            </div>
+        </div>
+        
+        <div class="quick-stat-card">
+            <div class="quick-stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="quick-stat-content">
+                <h4 id="assignmentCount">0</h4>
+                <p>Assignments</p>
+            </div>
+        </div>
+        
+        <div class="quick-stat-card">
+            <div class="quick-stat-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="quick-stat-content">
+                <h4 id="doubtCount">0</h4>
+                <p>Pending Doubts</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Details Modal -->
+<div class="modal fade" id="batchDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span id="modalBatchTitle">Batch Details</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="batchDetailsContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading batch details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="manageContentBtn">Manage Content</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Debug Modal -->
+<div class="modal fade" id="debugModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-bug me-2"></i>
+                    System Debug Results
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="debugResults">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Running diagnostic checks...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Global variables
+    let currentBatchId = null;
+    let currentBatchName = null;
+    
+    // View batch details
+    function viewBatchDetails(batchId, batchName) {
+        currentBatchId = batchId;
+        currentBatchName = batchName;
+        
+        // Update modal title
+        document.getElementById('modalBatchTitle').textContent = `${batchName} - Details`;
+        
+        // Set manage content button action
+        document.getElementById('manageContentBtn').onclick = function() {
+            uploadContent(batchId, batchName);
+        };
+        
+        // Show loading state
+        document.getElementById('batchDetailsContent').innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading batch details...</p>
+            </div>
+        `;
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('batchDetailsModal'));
+        modal.show();
+        
+        // Simulate loading batch details (replace with actual AJAX call)
+        setTimeout(() => {
+            document.getElementById('batchDetailsContent').innerHTML = `
+                <div class="batch-details-content">
+                    <h4>Batch Information</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Batch Name:</th>
+                                <td>${batchName}</td>
+                            </tr>
+                            <tr>
+                                <th>Batch ID:</th>
+                                <td>${batchId}</td>
+                            </tr>
+                            <tr>
+                                <th>Teacher ID:</th>
+                                <td>{{ teacher_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td><span class="badge bg-success">Active</span></td>
+                            </tr>
+                            <tr>
+                                <th>Total Students:</th>
+                                <td>Loading...</td>
+                            </tr>
+                            <tr>
+                                <th>Classes Scheduled:</th>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <th>Assignments Posted:</th>
+                                <td>0</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Recent Activity</h4>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No recent activity recorded.
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Quick Actions</h4>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-primary" onclick="uploadContent('${batchId}', '${batchName}')">
+                                <i class="fas fa-upload me-1"></i> Upload Material
+                            </button>
+                            <button class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-calendar-plus me-1"></i> Schedule Class
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-tasks me-1"></i> Create Assignment
+                            </button>
+                            <button class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-chart-bar me-1"></i> View Analytics
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }, 1000);
+    }
+    
+    // Manage content for batch
+    function uploadContent(batchId, batchName) {
+        alert(`Opening content management for: ${batchName}\n\nBatch ID: ${batchId}\nTeacher ID: {{ teacher_id }}\n\nYou can:\n• Upload lecture videos\n• Share study materials\n• Create assignments\n• Schedule exams`);
+        
+        // Close modal if open
+        const modal = bootstrap.Modal.getInstance(document.getElementById('batchDetailsModal'));
+        if (modal) {
+            modal.hide();
+        }
+        
+        // Here you would redirect to actual upload page
+        // window.location.href = `/teacher/batch/${batchId}/content/upload/`;
+    }
+    
+    // Refresh page
+    function refreshPage() {
+        location.reload();
+    }
+    
+    // Run debug checks
+    function runDebugChecks() {
+        const modal = new bootstrap.Modal(document.getElementById('debugModal'));
+        modal.show();
+        
+        setTimeout(() => {
+            document.getElementById('debugResults').innerHTML = `
+                <div class="debug-results">
+                    <h5>Diagnostic Results</h5>
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Session Teacher ID:</span>
+                                <span class="badge bg-info">${"{{ teacher_id }}"}</span>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Teacher Name:</span>
+                                <span class="badge bg-info">${"{{ teacher.firstname }} {{ teacher.lastname }}"}</span>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Total Batches Found:</span>
+                                <span class="badge ${parseInt("{{ total_batches }}") > 0 ? 'bg-success' : 'bg-danger'}">
+                                    ${"{{ total_batches }}"}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span>Database Connection:</span>
+                                <span class="badge bg-success">OK</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h6>Recommended Actions:</h6>
+                        <ol class="mb-0">
+                            <li>Check tbl_teacherbatch table for records with teacher_id = ${"{{ teacher_id }}"}</li>
+                            <li>Verify foreign key relationships in database</li>
+                            <li>Clear browser cache and try again</li>
+                            <li>Contact administrator if issue persists</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-sm btn-warning" onclick="clearSessionAndReload()">
+                            <i class="fas fa-redo me-1"></i> Clear Session & Reload
+                        </button>
+                    </div>
+                </div>
+            `;
+        }, 1500);
+    }
+    
+    // Clear debug panel
+    function clearDebugPanel() {
+        document.querySelector('.debug-panel').style.display = 'none';
+    }
+    
+    // Clear session and reload
+    function clearSessionAndReload() {
+        if (confirm('This will clear your session and reload the page. Continue?')) {
+            fetch('/clear-session/', {  // You need to create this endpoint
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                }
+            }).then(() => {
+                location.reload();
+            });
+        }
+    }
+    
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Search functionality
+        const searchInput = document.getElementById('batchSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const batchCards = document.querySelectorAll('.batch-card');
+                
+                let visibleCount = 0;
+                batchCards.forEach(card => {
+                    const searchData = card.getAttribute('data-search').toLowerCase();
+                    if (searchData.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Show message if no results
+                const container = document.getElementById('batchContainer');
+                if (container) {
+                    let message = container.querySelector('.no-results-message');
+                    if (visibleCount === 0 && searchTerm.length > 0) {
+                        if (!message) {
+                            message = document.createElement('div');
+                            message.className = 'no-results-message empty-state';
+                            message.innerHTML = `
+                                <i class="fas fa-search"></i>
+                                <h3>No matching batches found</h3>
+                                <p>Try searching with different keywords</p>
+                            `;
+                            container.appendChild(message);
+                        }
+                    } else if (message) {
+                        message.remove();
+                    }
+                }
+            });
+        }
+        
+        // Load statistics (simulated)
+        setTimeout(() => {
+            // Simulate loading statistics from server
+            document.getElementById('studentCount').textContent = '0';
+            document.getElementById('classCount').textContent = '0';
+            document.getElementById('assignmentCount').textContent = '0';
+            document.getElementById('doubtCount').textContent = '0';
+            
+            // If batches exist, update student count
+            const totalBatches = parseInt("{{ total_batches }}");
+            if (totalBatches > 0) {
+                // Simulate fetching student count
+                setTimeout(() => {
+                    document.getElementById('studentCount').textContent = (totalBatches * 25).toString();
+                }, 500);
+            }
+        }, 1000);
+        
+        // Auto-hide debug panel after 10 seconds
+        setTimeout(() => {
+            const debugPanel = document.querySelector('.debug-panel');
+            if (debugPanel && debugPanel.style.display !== 'none') {
+                debugPanel.style.opacity = '0.7';
+            }
+        }, 10000);
+        
+        // Log session info to console
+        console.log('Teacher Dashboard Loaded');
+        console.log('Teacher ID:', "{{ teacher_id }}");
+        console.log('Total Batches:', "{{ total_batches }}");
+    });
+</script>
+{% endblock %}

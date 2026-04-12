@@ -1,0 +1,302 @@
+{% extends 'indexnav.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .page-header {
+        background: linear-gradient(rgba(24, 29, 56, .7), rgba(24, 29, 56, .7)), url('{% static "mainstyle/img/carousel-1.jpg" %}');
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    
+    .contact-info-box {
+        padding: 30px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        transition: .3s;
+    }
+    
+    .contact-info-box:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
+    }
+    
+    .contact-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary);
+        color: white;
+        font-size: 30px;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        transition: .3s;
+    }
+    
+    .contact-info-box:hover .contact-icon {
+        background: var(--dark);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: none;
+    }
+    
+    .map-container {
+        height: 450px;
+        width: 100%;
+        border: 5px solid #f5f5f5;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .map-container iframe {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .social-links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        margin-right: 10px;
+        transition: .3s;
+    }
+    
+    .social-links a:hover {
+        background: var(--dark);
+        transform: translateY(-3px);
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <!-- Header Start -->
+    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="display-3 text-white animated slideInDown">Contact Us</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item text-white active" aria-current="page">Contact</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+    <!-- Contact Info Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Contact Us</h6>
+                <h1 class="mb-5">Get In Touch With Us</h1>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="contact-info-box text-center">
+                        <div class="contact-icon">
+                            <i class="fa fa-map-marker-alt"></i>
+                        </div>
+                        <h5>Office Address</h5>
+                        <p class="mb-0">123 Learning Street</p>
+                        <p>New York, NY 10001</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="contact-info-box text-center">
+                        <div class="contact-icon">
+                            <i class="fa fa-phone-alt"></i>
+                        </div>
+                        <h5>Phone Number</h5>
+                        <p class="mb-0">+1 (555) 123-4567</p>
+                        <p>+1 (555) 987-6543</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="contact-info-box text-center">
+                        <div class="contact-icon">
+                            <i class="fa fa-envelope"></i>
+                        </div>
+                        <h5>Email Address</h5>
+                        <p class="mb-0">info@novalearn.com</p>
+                        <p>support@novalearn.com</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="contact-info-box text-center">
+                        <div class="contact-icon">
+                            <i class="fa fa-clock"></i>
+                        </div>
+                        <h5>Working Hours</h5>
+                        <p class="mb-0">Mon - Fri: 9:00 - 18:00</p>
+                        <p>Sat - Sun: 10:00 - 16:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Contact Info End -->
+
+    <!-- Map Start -->
+    <div class="container-xxl">
+        <div class="container">
+            <div class="map-container wow fadeInUp" data-wow-delay="0.1s">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.9147704856!2d-74.11976313953818!3d40.69740344166049!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2s!4v1644314887840!5m2!1sen!2s" 
+                        allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+    <!-- Map End -->
+
+    <!-- Contact Form Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <h6 class="section-title bg-white text-start text-primary pe-3">Send A Message</h6>
+                    <h1 class="mb-4">Have Any Questions?</h1>
+                    <p class="mb-4">We're here to help! Whether you have questions about our courses, need assistance with enrollment, or want to discuss partnership opportunities, our team is ready to assist you.</p>
+                    
+                    <div class="social-links mb-4">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fa fa-check-circle text-primary fs-4 me-3"></i>
+                        <span>24/7 Customer Support</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fa fa-check-circle text-primary fs-4 me-3"></i>
+                        <span>Quick Response Time</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fa fa-check-circle text-primary fs-4 me-3"></i>
+                        <span>Expert Consultation Available</span>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <form method="POST" action="{% url 'contact' %}" class="bg-light p-4 rounded">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
+                                    <label for="name">Your Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" required>
+                                    <label for="email">Your Email</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
+                                    <label for="subject">Subject</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" placeholder="Leave a message here" id="message" name="message" style="height: 150px" required></textarea>
+                                    <label for="message">Your Message</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100 py-3" type="submit">Send Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Contact Form End -->
+
+    <!-- FAQ Section Start (Optional) -->
+    <div class="container-xxl py-5 bg-light">
+        <div class="container">
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">FAQ</h6>
+                <h1 class="mb-5">Frequently Asked Questions</h1>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="accordion" id="faqAccordion1">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    How do I enroll in a course?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion1">
+                                <div class="accordion-body">
+                                    Simply browse our courses, select the one you're interested in, and click the "Enroll Now" button. You'll need to create an account or log in to complete the enrollment process.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    Are certificates provided?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion1">
+                                <div class="accordion-body">
+                                    Yes, upon successful completion of a course, you will receive a certificate of completion that you can download and share on your professional profiles.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="accordion" id="faqAccordion2">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    What payment methods do you accept?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion2">
+                                <div class="accordion-body">
+                                    We accept all major credit cards, debit cards, and PayPal. All payments are processed securely through our payment gateway.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                    Can I access courses on mobile?
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion2">
+                                <div class="accordion-body">
+                                    Absolutely! Our platform is fully responsive and optimized for mobile devices, so you can learn anytime, anywhere.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FAQ Section End -->
+{% endblock %}

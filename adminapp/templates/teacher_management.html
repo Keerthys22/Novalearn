@@ -1,0 +1,561 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<div id="content" style="margin-top:50px;">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 text-primary">
+            <i class="fas fa-chalkboard-teacher me-2"></i>Teacher Management
+        </h1>
+        <div>
+            <span class="badge bg-primary me-2">{{ total_teachers }} Teachers</span>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
+                <i class="fas fa-plus me-1"></i>Add New Teacher
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Teachers Grid -->
+    <div class="row">
+        {% for teacher in teachers %}
+        <div class="col-md-4 mb-4">
+            <div class="card teacher-card h-100 shadow">
+                <div class="card-body">
+                    <!-- Teacher Header -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            {% if teacher.profilepic %}
+                            <img src="{{ teacher.profilepic.url }}" alt="{{ teacher.firstname }}" 
+                                 class="rounded-circle" width="60" height="60" style="object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" 
+                                 style="width: 60px; height: 60px;">
+                                <span class="text-white fs-4">{{ teacher.firstname|first }}{{ teacher.lastname|first }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-0">{{ teacher.firstname }} {{ teacher.lastname }}</h5>
+                            <p class="text-muted mb-1 small">
+                                <i class="fas fa-graduation-cap me-1"></i>{{ teacher.qualification }}
+                            </p>
+                            <span class="badge bg-info">{{ teacher.department.stream_name }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Teacher Details -->
+                    <div class="mb-3">
+                        <p class="card-text small">
+                            <strong>Specialization:</strong><br>
+                            {{ teacher.specialization|truncatewords:20 }}
+                        </p>
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>
+                                <i class="fas fa-briefcase me-1"></i>
+                                {{ teacher.experienceyear }} year{{ teacher.experienceyear|pluralize }} exp.
+                            </span>
+                            <span>
+                                <i class="fas fa-envelope me-1"></i>
+                                {{ teacher.login.email }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bio File -->
+                    {% if teacher.bio %}
+                    <div class="mb-3">
+                        <a href="{{ teacher.bio.url }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                            <i class="fas fa-file-pdf me-1"></i>View Bio/CV
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-sm btn-outline-info" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#viewTeacherModal{{ teacher.id }}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editTeacherModal{{ teacher.id }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" 
+                                onclick="confirmDelete('{{ teacher.id }}', '{{ teacher.firstname }} {{ teacher.lastname }}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-chalkboard-teacher fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Teachers Found</h4>
+            <p class="text-muted">Click "Add New Teacher" to add your first teacher.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Teacher Modal -->
+<div class="modal fade" id="addTeacherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>Add New Teacher
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'manage_teachers' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="add_teacher" value="true">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Personal Info -->
+                        <div class="col-md-6 mb-3">
+                            <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email Address *</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.email.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Password *</label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Confirm Password *</label>
+                                {{ form.confirm_password }}
+                                {% if form.confirm_password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.confirm_password.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">First Name *</label>
+                                    {{ form.firstname }}
+                                    {% if form.firstname.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.firstname.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Last Name *</label>
+                                    {{ form.lastname }}
+                                    {% if form.lastname.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.lastname.errors %}
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Professional Info -->
+                        <div class="col-md-6 mb-3">
+                            <h6 class="border-bottom pb-2 mb-3">Professional Information</h6>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Qualification *</label>
+                                {{ form.qualification }}
+                                {% if form.qualification.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.qualification.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Specialization *</label>
+                                {{ form.specialization }}
+                                {% if form.specialization.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.specialization.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Experience (Years) *</label>
+                                {{ form.experienceyear }}
+                                {% if form.experienceyear.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.experienceyear.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Department *</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.department.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Profile Picture</label>
+                                {{ form.profilepic }}
+                                {% if form.profilepic.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.profilepic.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Bio/CV Document</label>
+                                {{ form.bio }}
+                                {% if form.bio.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.bio.errors %}
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted">PDF, DOC, DOCX (max 10MB)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Teacher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Teacher Modals -->
+{% for teacher in teachers %}
+<div class="modal fade" id="viewTeacherModal{{ teacher.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-graduate me-2"></i>Teacher Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        {% if teacher.profilepic %}
+                        <img src="{{ teacher.profilepic.url }}" alt="{{ teacher.firstname }}" 
+                             class="rounded-circle img-fluid mb-3" style="max-width: 200px;">
+                        {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3" 
+                             style="width: 200px; height: 200px;">
+                            <span class="text-white fs-1">{{ teacher.firstname|first }}{{ teacher.lastname|first }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <h4>{{ teacher.firstname }} {{ teacher.lastname }}</h4>
+                        <p class="text-muted">{{ teacher.qualification }}</p>
+                        <span class="badge bg-primary">{{ teacher.department.stream_name }}</span>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <h6 class="border-bottom pb-2 mb-3">Professional Information</h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Experience:</strong><br>
+                                {{ teacher.experienceyear }} year{{ teacher.experienceyear|pluralize }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Email:</strong><br>
+                                {{ teacher.login.email }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p><strong>Specialization:</strong></p>
+                            <p class="text-justify">{{ teacher.specialization }}</p>
+                        </div>
+                        
+                        {% if teacher.bio %}
+                        <div class="mb-3">
+                            <p><strong>Bio/CV:</strong></p>
+                            <a href="{{ teacher.bio.url }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-file-pdf me-1"></i>Download Bio/CV
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Edit Teacher Modals -->
+{% for teacher in teachers %}
+<div class="modal fade" id="editTeacherModal{{ teacher.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Teacher: {{ teacher.firstname }} {{ teacher.lastname }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'edit_teacher' teacher.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="mb-3">
+                                <label class="form-label">First Name *</label>
+                                <input type="text" class="form-control" name="firstname" 
+                                       value="{{ teacher.firstname }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" name="lastname" 
+                                       value="{{ teacher.lastname }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Qualification *</label>
+                                <input type="text" class="form-control" name="qualification" 
+                                       value="{{ teacher.qualification }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Experience (Years) *</label>
+                                <input type="number" class="form-control" name="experienceyear" 
+                                       value="{{ teacher.experienceyear }}" min="0" max="50" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="mb-3">
+                                <label class="form-label">Specialization *</label>
+                                <textarea class="form-control" name="specialization" rows="4" required>{{ teacher.specialization }}</textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Department *</label>
+                                <select class="form-control" name="department" required>
+                                    <option value="">--- Select Department ---</option>
+                                    {% for stream in streams %}
+                                    <option value="{{ stream.id }}" {% if stream.id == teacher.department.id %}selected{% endif %}>
+                                        {{ stream.stream_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" name="profilepic" accept="image/*">
+                                {% if teacher.profilepic %}
+                                <small class="text-muted">Current: {{ teacher.profilepic.name|slice:"12:" }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Bio/CV Document</label>
+                                <input type="file" class="form-control" name="bio" accept=".pdf,.doc,.docx">
+                                {% if teacher.bio %}
+                                <small class="text-muted">Current: {{ teacher.bio.name|slice:"10:" }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Update Teacher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete teacher: <strong id="deleteTeacherName"></strong>?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    This will permanently delete the teacher and their login credentials.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .teacher-card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .teacher-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .teacher-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .text-justify {
+        text-align: justify;
+    }
+</style>
+
+<!-- JavaScript -->
+<script>
+    // Confirm delete
+    function confirmDelete(id, name) {
+        document.getElementById('deleteTeacherName').textContent = name;
+        document.getElementById('deleteForm').action = `/admin/teachers/delete/${id}/`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    // Form validation and auto-focus
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                bootstrap.Alert.getInstance(alert)?.close();
+            });
+        }, 5000);
+        
+        // Focus on first input when modal opens
+        const addModal = document.getElementById('addTeacherModal');
+        if (addModal) {
+            addModal.addEventListener('shown.bs.modal', function() {
+                const firstInput = addModal.querySelector('#teacher-email');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            });
+        }
+        
+        // Preview image before upload
+        const profilePicInput = document.querySelector('input[name="profilepic"]');
+        if (profilePicInput) {
+            profilePicInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // You can add image preview functionality here
+                        console.log('Image selected:', this.result.substring(0, 100));
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

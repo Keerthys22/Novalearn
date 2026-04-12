@@ -1,0 +1,199 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">My Courses</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_classes' batch.id %}">{{ batch.course.coursename }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Exams</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h2 class="mb-3">
+                    <i class="fas fa-pencil-alt text-primary me-2"></i>
+                    Exams - {{ batch.course.coursename }}
+                </h2>
+                <p class="text-muted">Batch: {{ batch.batchname }} ({{ batch.batchcode }})</p>
+                
+                <!-- Eligibility Status -->
+                <div class="alert {% if is_eligible %}alert-success{% else %}alert-warning{% endif %}">
+                    <i class="fas {% if is_eligible %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %} me-2"></i>
+                    {% if is_eligible %}
+                        <strong>You are eligible to write exams!</strong> You have completed all requirements.
+                    {% else %}
+                        <strong>You are not eligible to write exams yet.</strong> 
+                        Requirements: 
+                        <ul class="mb-0 mt-2">
+                            <li>Submit 2 assignments: {{ submitted_assignments_count }}/2 completed</li>
+                            <li>Payment status: {{ payment_status }}</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Exams List -->
+        {% if exams %}
+            <div class="row">
+                {% for exam in exams %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm {% if exam.id in completed_exams %}border-success{% endif %}">
+                        <div class="card-header {% if exam.id in completed_exams %}bg-success{% else %}bg-primary{% endif %} text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas {% if exam.id in completed_exams %}fa-check-circle{% else %}fa-clock{% endif %} me-2"></i>
+                                    {{ exam.examcode }}
+                                </h5>
+                                <span class="badge bg-light text-dark">{{ exam.totalscore }} Marks</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Duration</small>
+                                    <strong>{{ exam.duration }} minutes</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Total Marks</small>
+                                    <strong>{{ exam.totalscore }}</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Questions in Exam</small>
+                                    <strong>20 Questions</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Marks per Question</small>
+                                    <strong>1 Mark</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info p-2 small">
+                                <i class="fas fa-random me-1"></i>
+                                20 random questions will be selected for this exam
+                            </div>
+
+                            {% if exam.id in completed_exams %}
+                                {% for result in exam_results %}
+                                    {% if result.exam_id == exam.id %}
+                                    <div class="alert alert-success">
+                                        <div class="d-flex justify-content-between">
+                                            <span><i class="fas fa-star me-2"></i>Your Score:</span>
+                                            <strong>{{ result.score }}/{{ exam.totalscore }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <span><i class="fas fa-percentage me-2"></i>Percentage:</span>
+                                            <strong>{{ result.percentage|floatformat:1 }}%</strong>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="fas fa-check-circle me-2"></i>Exam Completed
+                                </button>
+                                <a href="{% url 'view_exam_result' batch.id exam.id %}" class="btn btn-outline-info w-100 mt-2">
+                                    <i class="fas fa-eye me-2"></i>View Results
+                                </a>
+                            {% else %}
+                                {% if is_eligible %}
+                                    <a href="{% url 'exam_instructions' batch.id exam.id %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-play-circle me-2"></i>Start Exam
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-secondary w-100" disabled>
+                                        <i class="fas fa-lock me-2"></i>Locked - Complete Requirements
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-pencil-alt fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted">No exams available for this course</h4>
+                <p>Check back later for exam updates</p>
+            </div>
+        {% endif %}
+
+        <!-- Certificate Section - Show only if certificate is available -->
+        {% if certificate_available %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-success shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-certificate me-2"></i>
+                            Course Completion
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-trophy fa-3x text-warning me-3"></i>
+                                    <div>
+                                        <h4 class="mb-1">Congratulations, {{ student.first_name }}!</h4>
+                                        <p class="text-muted mb-0">You have successfully completed all requirements for {{ batch.course.coursename }}.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-4">
+                                    <div class="col-md-4">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <small class="text-muted d-block">Final Score</small>
+                                            <strong class="h4">{{ final_mark }}/{{ total_marks }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <small class="text-muted d-block">Percentage</small>
+                                            <strong class="h4">{{ percentage }}%</strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center p-3 bg-light rounded">
+                                            <small class="text-muted d-block">Grade</small>
+                                            <strong class="h4 text-{% if grade == 'F' %}danger{% else %}success{% endif %}">{{ grade }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex flex-column align-items-center justify-content-center">
+                                <a href="{% url 'view_certificate' enrollment.id %}" class="btn btn-success btn-lg mb-3 w-100" target="_blank">
+                                    <i class="fas fa-certificate me-2"></i>
+                                    View Certificate
+                                </a>
+                                
+                                {% if user_has_reviewed %}
+                                    <a href="{% url 'add_course_review' batch.course.id batch.id %}" class="btn btn-outline-warning btn-lg w-100">
+                                        <i class="fas fa-edit me-2"></i>
+                                        Edit Your Review
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'add_course_review' batch.course.id batch.id %}" class="btn btn-outline-light btn-lg w-100" style="border-color: #ffc107; color: #ffc107;">
+                                        <i class="fas fa-star me-2"></i>
+                                        Add Review & Rating
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

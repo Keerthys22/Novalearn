@@ -1,0 +1,290 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <!-- Course Details -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="mb-0">{{ course.coursename }}</h1>
+                        <span class="badge bg-primary fs-6">{{ course.stream.stream_name }}</span>
+                    </div>
+                    
+                    <!-- Course Image -->
+                    {% if course.image %}
+                    <div class="mb-4">
+                        <img src="{{ course.image.url }}" class="img-fluid rounded" alt="{{ course.coursename }}" style="width: 100%; max-height: 400px; object-fit: cover;">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-clock me-2"></i>Duration
+                                    </h6>
+                                    <p class="card-text fs-5">{{ course.durationweeks }} weeks</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-tag me-2"></i>Price
+                                    </h6>
+                                    <p class="card-text fs-5">
+                                        {% if course.rate > 0 %}
+                                            ${{ course.rate }}
+                                        {% else %}
+                                            Free
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Course Description
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if course.description %}
+                            <p class="card-text">{{ course.description|linebreaks }}</p>
+                            {% else %}
+                            <p class="card-text text-muted">No detailed description available for this course.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tasks me-2"></i>What You'll Learn
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Comprehensive curriculum</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Hands-on projects</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Expert guidance</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Certificate of completion</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Lifetime access</li>
+                                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Career support</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Enrollment Card -->
+                <div class="card shadow-lg border-0 mb-4">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-rocket me-2"></i>Start Learning
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            {% if course.rate > 0 %}
+                                <h3 class="text-primary">${{ course.rate }}</h3>
+                            {% else %}
+                                <h3 class="text-primary">FREE</h3>
+                            {% endif %}
+                            <p class="text-muted">Enroll now to start your learning journey</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="#{% comment %} {% url 'enroll_course' course.id %} {% endcomment %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Enroll Now
+                            </a>
+                            <a href="{% url 'student_home' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Courses
+                            </a>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="small">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>What's Included:
+                            </h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Full course access</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Downloadable resources</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Certificate of completion</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Q&A support</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Mobile and TV access</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Info -->
+                <div class="card border-0 mb-4">
+                    <div class="card-body">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-university me-2"></i>Course Stream
+                        </h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded me-3">
+                                <i class="fas fa-graduation-cap text-primary fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ course.stream.stream_name }}</h6>
+                                <small class="text-muted">{{ course.stream.streamcode }}</small>
+                            </div>
+                        </div>
+                        {% if course.stream.description %}
+                        <p class="small text-muted">{{ course.stream.description|truncatewords:30 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Reviews Summary Card -->
+                {% if total_reviews > 0 %}
+                <div class="card border-0 mb-4">
+                    <div class="card-body">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-star me-2"></i>Student Reviews
+                        </h6>
+                        
+                        <!-- Average Rating -->
+                        <div class="text-center mb-4">
+                            <div class="display-4 fw-bold text-primary">{{ avg_rating|floatformat:1 }}</div>
+                            <div class="text-warning mb-2">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= avg_rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% elif forloop.counter <= avg_rating|add:0.5 %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <div class="text-muted">Based on {{ total_reviews }} review{{ total_reviews|pluralize }}</div>
+                        </div>
+                        
+                        <!-- Rating Breakdown - Without custom filter -->
+                        <div class="mb-3">
+                            {% for rating_value in "54321"|make_list %}
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2" style="width: 30px;">{{ rating_value }}★</span>
+                                <div class="progress flex-grow-1" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         style="width: 
+                                         {% if rating_value == '5' %}
+                                            {% widthratio review_counts.5|default:0 total_reviews 100 %}%
+                                         {% elif rating_value == '4' %}
+                                            {% widthratio review_counts.4|default:0 total_reviews 100 %}%
+                                         {% elif rating_value == '3' %}
+                                            {% widthratio review_counts.3|default:0 total_reviews 100 %}%
+                                         {% elif rating_value == '2' %}
+                                            {% widthratio review_counts.2|default:0 total_reviews 100 %}%
+                                         {% elif rating_value == '1' %}
+                                            {% widthratio review_counts.1|default:0 total_reviews 100 %}%
+                                         {% endif %}">
+                                    </div>
+                                </div>
+                                <span class="ms-2 small">
+                                    {% if rating_value == '5' %}{{ review_counts.5|default:0 }}
+                                    {% elif rating_value == '4' %}{{ review_counts.4|default:0 }}
+                                    {% elif rating_value == '3' %}{{ review_counts.3|default:0 }}
+                                    {% elif rating_value == '2' %}{{ review_counts.2|default:0 }}
+                                    {% elif rating_value == '1' %}{{ review_counts.1|default:0 }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Reviews Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Student Reviews ({{ total_reviews }})
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if reviews %}
+                            <div class="row">
+                                {% for review in reviews %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" 
+                                                     style="width: 50px; height: 50px;">
+                                                    <span class="text-primary fs-5 fw-bold">
+                                                        {{ review.student.first_name|first|upper }}{{ review.student.last_name|first|upper }}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ review.student.first_name }} {{ review.student.last_name }}</h6>
+                                                    <div class="text-warning small">
+                                                        {% for i in "12345"|make_list %}
+                                                            {% if forloop.counter <= review.rating %}
+                                                                <i class="fas fa-star"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    <small class="text-muted">{{ review.created_at|date:"F d, Y" }}</small>
+                                                </div>
+                                            </div>
+                                            <p class="card-text">{{ review.review_text }}</p>
+                                            {% if review.batch %}
+                                                <small class="text-muted">
+                                                    <i class="fas fa-layer-group me-1"></i>Batch: {{ review.batch.batchname }}
+                                                </small>
+                                            {% endif %}
+                                            
+                                            <!-- Approval Status (Optional - for admin view) -->
+                                            {% if not review.is_approved %}
+                                                <span class="badge bg-warning mt-2">Pending Approval</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-star fa-4x text-muted mb-3"></i>
+                                <h5 class="text-muted">No reviews yet</h5>
+                                <p class="text-muted">Be the first to review this course!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

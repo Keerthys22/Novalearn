@@ -1,0 +1,348 @@
+{% extends 'indexnav.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .student-registration {
+        background: #ffffff;
+        min-height: 100vh;
+        padding: 50px 0;
+    }
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        background: #ffffff;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #06BBCC 0%, #06BBCC 100%);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+        padding: 30px 20px;
+    }
+    .card-header h3 {
+        margin: 0;
+        font-weight: 600;
+    }
+    .card-body {
+        padding: 30px;
+        background: #ffffff;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #06BBCC 0%, #06BBCC 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #05a7b7 0%, #05a7b7 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(6, 187, 204, 0.4);
+        color: white;
+    }
+    .alert {
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .file-input-info {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .preview-container {
+        margin-top: 10px;
+        text-align: center;
+    }
+    .image-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 50%;
+        border: 3px solid #e9ecef;
+        display: none;
+    }
+    .text-primary {
+        color: #06BBCC !important;
+    }
+    a.text-primary {
+        color: #06BBCC !important;
+    }
+    a.text-primary:hover {
+        color: #05a7b7 !important;
+    }
+    .form-control:focus {
+        border-color: #06BBCC;
+        box-shadow: 0 0 0 0.2rem rgba(6, 187, 204, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="student-registration">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3>Student Registration</h3>
+                        <p class="mb-0">Join our learning community</p>
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Login Info -->
+                            <h5 class="mb-4 text-primary">Login Information</h5>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.email.label }}</label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.email.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.password.label }}</label>
+                                        {{ form.password }}
+                                        {% if form.password.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.password.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Must contain uppercase, lowercase, and numbers</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Confirm Password</label>
+                                        {{ form.confirm_password }}
+                                        {% if form.confirm_password.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.confirm_password.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Personal Info -->
+                            <h5 class="mb-4 text-primary mt-4">Personal Information</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.first_name.label }}</label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.first_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.last_name.label }}</label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.last_name.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.phno.label }}</label>
+                                        {{ form.phno }}
+                                        {% if form.phno.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.phno.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.dob.label }}</label>
+                                        {{ form.dob }}
+                                        {% if form.dob.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.dob.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.gender.label }}</label>
+                                        {{ form.gender }}
+                                        {% if form.gender.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.gender.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ form.profile_pic.label }} (Optional)</label>
+                                        <input type="file" 
+                                               name="profile_pic" 
+                                               id="id_profile_pic" 
+                                               class="form-control" 
+                                               accept="image/*"
+                                               onchange="previewImage(this)">
+                                        <small class="file-input-info">Max size: 5MB. Allowed: JPG, JPEG, PNG, GIF, BMP</small>
+                                        {% if form.profile_pic.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ form.profile_pic.errors }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="preview-container">
+                                            <img id="imagePreview" class="image-preview" src="#" alt="Profile Preview">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Educational Background -->
+                            <div class="form-group">
+                                <label class="form-label">{{ form.educational_background.label }}</label>
+                                {{ form.educational_background }}
+                                {% if form.educational_background.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.educational_background.errors }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">Briefly describe your educational background (minimum 10 characters)</small>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">Register as Student</button>
+                            </div>
+                            
+                            <!-- Login Link -->
+                            <div class="text-center mt-3">
+                                <p>Already have an account? <a href="" class="text-primary">Login here</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        const file = input.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            
+            reader.readAsDataURL(file);
+            
+            // Check file size
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                alert('File size exceeds 5MB limit. Please choose a smaller file.');
+                input.value = ''; // Clear the file input
+                preview.style.display = 'none';
+            }
+            
+            // Check file type
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif|\.bmp)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+                alert('Invalid file type. Please upload an image file (JPG, JPEG, PNG, GIF, BMP).');
+                input.value = ''; // Clear the file input
+                preview.style.display = 'none';
+            }
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    
+    // Form validation enhancements
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+        const confirmPasswordField = document.getElementById('{{ form.confirm_password.id_for_label }}');
+        
+        if (passwordField && confirmPasswordField) {
+            passwordField.addEventListener('input', function() {
+                const password = this.value;
+                const strengthDiv = document.getElementById('password-strength');
+                
+                if (!strengthDiv) {
+                    const div = document.createElement('div');
+                    div.id = 'password-strength';
+                    div.className = 'form-text';
+                    this.parentNode.appendChild(div);
+                }
+                
+                const div = document.getElementById('password-strength');
+                let strength = 0;
+                let message = '';
+                let color = '#dc3545';
+                
+                if (password.length >= 8) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[a-z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+                
+                if (strength <= 1) {
+                    message = 'Very Weak';
+                    color = '#dc3545';
+                } else if (strength === 2) {
+                    message = 'Weak';
+                    color = '#ffc107';
+                } else if (strength === 3) {
+                    message = 'Good';
+                    color = '#17a2b8';
+                } else {
+                    message = 'Strong';
+                    color = '#28a745';
+                }
+                
+                div.textContent = `Password Strength: ${message}`;
+                div.style.color = color;
+            });
+        }
+    });
+</script>
+{% endblock %}

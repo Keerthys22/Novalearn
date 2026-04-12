@@ -1,0 +1,393 @@
+<!-- manage_recorded_classes.html -->
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    /* Additional styles for the manage classes page */
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .content-title h2 {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .content-title p {
+        color: var(--text-light);
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .batch-info {
+        background-color: var(--primary-light);
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .batch-info i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .batch-info span {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    /* Table Styles */
+    .table-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .lessons-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .lessons-table thead {
+        background-color: var(--primary-light);
+    }
+    
+    .lessons-table th {
+        padding: 15px 20px;
+        text-align: left;
+        color: var(--text-dark);
+        font-weight: 600;
+        border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .lessons-table td {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-light);
+    }
+    
+    .lessons-table tbody tr:hover {
+        background-color: #f9f9f9;
+    }
+    
+    /* Action buttons in table */
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-edit {
+        background-color: var(--warning-color);
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-edit:hover {
+        background-color: #e0a800;
+        color: white;
+    }
+    
+    .btn-delete {
+        background-color: var(--danger-color);
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .btn-delete:hover {
+        background-color: #c82333;
+    }
+    
+    /* File links */
+    .file-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .file-link:hover {
+        text-decoration: underline;
+    }
+    
+    /* Form Styles */
+    .form-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+    }
+    
+    .form-title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        color: var(--text-dark);
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--primary-light);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .file-input {
+        padding: 8px;
+        border: 1px dashed var(--border-color);
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-light);
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--border-color);
+        margin-bottom: 15px;
+    }
+    
+    /* Messages */
+    .alert {
+        padding: 12px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-color: #c3e6cb;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+    
+    .no-batch-alert {
+        background-color: #fff3cd;
+        color: #856404;
+        border-color: #ffeaa7;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .no-batch-alert i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="content-header">
+    <div class="content-title">
+        <h2>Manage Recorded Classes</h2>
+        <p>Upload, edit, and delete recorded lessons with study materials</p>
+    </div>
+    {% if batch %}
+    <a href="{% url 'manage_assignments' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Assignments
+    <a href="{% url 'add_lesson_page' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Lesson
+    </a>
+
+    <li class="nav-item">
+    <a href="{% url 'manage_doubts' %}" class="nav-link">
+        <i class="fas fa-question-circle me-2"></i>
+        <span>Manage Doubts</span>
+        {% if pending_doubts_count %}
+        <span class="badge bg-warning ms-auto">{{ pending_doubts_count }}</span>
+        {% endif %}
+    </a>
+</li>
+    {% endif %}
+</div>
+
+<!-- Display Messages -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Batch Info -->
+{% if batch %}
+<div class="batch-info">
+    <i class="fas fa-users"></i>
+    <span>Current Batch: {{ batch.batch_name }}</span>
+</div>
+
+<!-- Lessons Table -->
+<div class="table-container">
+    <div class="table-responsive">
+        {% if lessons %}
+        <table class="lessons-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Module</th>
+                    <th>Module Title</th>
+                    <th>Lesson Title</th>
+                    <th>PDF Notes</th>
+                    <th>Video</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lesson in lessons %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ lesson.modulenumber }}</td>
+                    <td>{{ lesson.moduletitle }}</td>
+                    <td>{{ lesson.lessontitle }}</td>
+                    <td>
+                        {% if lesson.pdfnotes %}
+                        <a href="{{ lesson.pdfnotes.url }}" class="file-link" target="_blank">
+                            <i class="fas fa-file-pdf"></i> View PDF
+                        </a>
+                        {% else %}
+                        <span class="text-muted">No PDF</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if lesson.videos %}
+                        <a href="{{ lesson.videos.url }}" class="file-link" target="_blank">
+                            <i class="fas fa-video"></i> Watch Video
+                        </a>
+                        {% else %}
+                        <span class="text-muted">No Video</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'edit_lesson' lesson.id %}" class="btn-edit">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="POST" action="{% url 'delete_lesson' lesson.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this lesson?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-video-slash"></i>
+            <h3>No Recorded Classes Yet</h3>
+            <p>Click the "Add New Lesson" button to upload your first recorded class.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+<!-- No Batch Selected Message -->
+<div class="no-batch-alert">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h3>No Batch Selected</h3>
+    <p>Please select a batch from your dashboard before managing recorded classes.</p>
+    <a href="{% url 'teacherdashboard' %}" class="btn btn-primary" style="margin-top: 15px;">
+        <i class="fas fa-arrow-left"></i> Go to Dashboard
+    </a>
+</div>
+{% endif %}
+{% endblock %}

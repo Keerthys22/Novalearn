@@ -1,0 +1,382 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">My Courses</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_classes' batch.id %}">{{ batch.course.coursename }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Payment Details</li>
+            </ol>
+        </nav>
+
+        <!-- Course Header -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h2 class="mb-3">
+                    <i class="fas fa-credit-card text-success me-2"></i>
+                    Payment Details - {{ batch.course.coursename }}
+                </h2>
+                <p class="text-muted">Batch: {{ batch.batchname }} ({{ batch.batchcode }})</p>
+            </div>
+        </div>
+
+        <!-- Payment Summary Card -->
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Course Fee Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Course Fee Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <small class="text-muted">Total Course Fee</small>
+                                <h4 class="mb-0">₹ {{ total_fee|floatformat:2 }}</h4>
+                            </div>
+                            <div class="col-sm-6">
+                                <small class="text-muted">Enrollment Date</small>
+                                <h6 class="mb-0">{{ enrollment.enrollment_date|date:"d M Y" }}</h6>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Paid Amount -->
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded">
+                                    <small class="text-success d-block">
+                                        <i class="fas fa-check-circle me-1"></i>Paid Amount
+                                    </small>
+                                    <h3 class="text-success mb-0">₹ {{ total_paid|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded">
+                                    <small class="text-warning d-block">
+                                        <i class="fas fa-clock me-1"></i>Balance Amount
+                                    </small>
+                                    <h3 class="text-warning mb-0">₹ {{ balance|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Status Badge -->
+                        <div class="alert {% if balance == 0 %}alert-success{% else %}alert-warning{% endif %} mb-0">
+                            <i class="fas {% if balance == 0 %}fa-check-circle{% else %}fa-exclamation-triangle{% endif %} me-2"></i>
+                            {% if balance == 0 %}
+                                <strong>Fully Paid!</strong> You have completed all payments for this course.
+                            {% else %}
+                                <strong>Pending Payment:</strong> Please pay the remaining balance of ₹ {{ balance|floatformat:2 }} to complete your course fee.
+                                <div class="mt-3">
+                                    <a href="{% url 'make_payment' batch.id %}" class="btn btn-warning">
+                                        <i class="fas fa-credit-card me-2"></i>Pay Now ₹ {{ balance|floatformat:2 }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment History -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Payment History</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if payments %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>Payment Mode</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Receipt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in payments %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ payment.paymentdate|date:"d M Y" }}</td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    {% if payment.payment_mode == 'card' %}
+                                                        <i class="fas fa-credit-card me-1"></i>Card
+                                                    {% elif payment.payment_mode == 'cash' %}
+                                                        <i class="fas fa-money-bill me-1"></i>Cash
+                                                    {% elif payment.payment_mode == 'online' %}
+                                                        <i class="fas fa-mobile-alt me-1"></i>Online
+                                                    {% else %}
+                                                        {{ payment.payment_mode }}
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td><strong>₹ {{ payment.amount|floatformat:2 }}</strong></td>
+                                            <td>
+                                                <span class="badge {% if payment.paymentstatus == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                                    {% if payment.paymentstatus == 'completed' %}
+                                                        <i class="fas fa-check-circle me-1"></i>Completed
+                                                    {% else %}
+                                                        <i class="fas fa-clock me-1"></i>{{ payment.paymentstatus|title }}
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary" onclick="showReceipt({{ payment.id }}, '{{ payment.paymentdate|date:"d M Y" }}', {{ payment.amount }})">
+                                                    <i class="fas fa-receipt me-1"></i>View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-success">
+                                        <tr>
+                                            <th colspan="3" class="text-end">Total Paid:</th>
+                                            <th colspan="3">₹ {{ total_paid|floatformat:2 }}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">No payment records found</h6>
+                                <p class="small text-muted">Your initial enrollment payment of ₹ {{ fixed_amount|floatformat:2 }} should appear here</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Payment Summary Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Payment Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted">Course Fee Breakdown</small>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Total Course Fee:</span>
+                                <strong>₹ {{ total_fee|floatformat:2 }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-success">
+                                <span>Paid Amount:</span>
+                                <strong>₹ {{ total_paid|floatformat:2 }}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-warning">
+                                <span>Balance Amount:</span>
+                                <strong>₹ {{ balance|floatformat:2 }}</strong>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <span>Initial Payment (Enrollment):</span>
+                                <strong>₹ {{ fixed_amount|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ payment_percentage }}%;" 
+                                 aria-valuenow="{{ payment_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ payment_percentage|floatformat:1 }}% Paid
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Pay Button -->
+                        {% if balance > 0 %}
+                            <a href="{% url 'make_payment' batch.id %}" class="btn btn-warning w-100">
+                                <i class="fas fa-bolt me-2"></i>Quick Pay ₹ {{ balance|floatformat:2 }}
+                            </a>
+                        {% else %}
+                            <button class="btn btn-success w-100" disabled>
+                                <i class="fas fa-check-circle me-2"></i>Fully Paid
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Course Info Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Course Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="fas fa-book text-primary me-2"></i>
+                                <strong>Course:</strong> {{ batch.course.coursename }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-layer-group text-primary me-2"></i>
+                                <strong>Stream:</strong> {{ batch.course.stream.stream_name }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-tag text-primary me-2"></i>
+                                <strong>Batch:</strong> {{ batch.batchname }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                <strong>Enrolled:</strong> {{ enrollment.enrollment_date|date:"d M Y" }}
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-clock text-primary me-2"></i>
+                                <strong>Duration:</strong> {{ batch.course.durationweeks }} weeks
+                            </li>
+                            <li>
+                                <i class="fas fa-rupee-sign text-primary me-2"></i>
+                                <strong>Course Fee:</strong> ₹ {{ batch.course.rate|floatformat:2 }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt me-2"></i>Payment Receipt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="receiptContent">
+                <!-- Receipt content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print me-2"></i>Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showReceipt(paymentId, paymentDate, amount) {
+        var receiptHtml = `
+            <div class="text-center mb-4">
+                <h4>Payment Receipt</h4>
+                <p class="text-muted">Receipt #: ${paymentId}</p>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <strong>Course:</strong> {{ batch.course.coursename }}<br>
+                    <strong>Batch:</strong> {{ batch.batchname }}<br>
+                    <strong>Student:</strong> {{ enrollment.studentid.name }}<br>
+                    <strong>Enrollment ID:</strong> {{ enrollment.id }}
+                </div>
+                <div class="col-6 text-end">
+                    <strong>Date:</strong> ${paymentDate}<br>
+                    <strong>Payment Mode:</strong> Card<br>
+                    <strong>Status:</strong> <span class="text-success">Completed</span>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Description</th>
+                        <th class="text-end">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Course Fee Payment - {{ batch.course.coursename }}</td>
+                        <td class="text-end">${amount.toFixed(2)}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class="text-end">Total:</th>
+                        <th class="text-end">₹ ${amount.toFixed(2)}</th>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="row mt-4">
+                <div class="col-6">
+                    <p class="mb-0"><strong>Payment Summary:</strong></p>
+                    <small>Total Course Fee: ₹ {{ total_fee|floatformat:2 }}</small><br>
+                    <small>Total Paid: ₹ {{ total_paid|floatformat:2 }}</small><br>
+                    <small>Balance: ₹ {{ balance|floatformat:2 }}</small>
+                </div>
+                <div class="col-6 text-end">
+                    <p class="mb-0">Authorized Signature</p>
+                    <br>
+                    <p class="mb-0">_________________</p>
+                </div>
+            </div>
+            <div class="text-muted small mt-3 text-center">
+                <p>Thank you for your payment. This is a system generated receipt.</p>
+                <p class="mb-0">For any queries, please contact support.</p>
+            </div>
+        `;
+        
+        document.getElementById('receiptContent').innerHTML = receiptHtml;
+        new bootstrap.Modal(document.getElementById('receiptModal')).show();
+    }
+    
+    function printReceipt() {
+        var printContent = document.getElementById('receiptContent').innerHTML;
+        var originalContent = document.body.innerHTML;
+        
+        document.body.innerHTML = printContent;
+        window.print();
+        document.body.innerHTML = originalContent;
+        location.reload(); // Reload to restore the page
+    }
+</script>
+
+<style>
+    .table tfoot {
+        font-weight: bold;
+    }
+    
+    .progress {
+        border-radius: 15px;
+    }
+    
+    .progress-bar {
+        border-radius: 15px;
+        font-weight: 500;
+    }
+    
+    .card-header {
+        font-weight: 600;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #receiptContent, #receiptContent * {
+            visibility: visible;
+        }
+        #receiptContent {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

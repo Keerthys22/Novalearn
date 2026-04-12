@@ -1,0 +1,349 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<div id="content" style="margin-top:50px;">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 text-primary">
+            <i class="fas fa-users me-2"></i>Batch Management
+        </h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBatchModal">
+            <i class="fas fa-plus me-1"></i>Add New Batch
+        </button>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Batches Table -->
+    <div class="card shadow">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Batch List
+                <span class="badge bg-primary ms-2">{{ batches|length }} Batches</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if batches %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Batch Code</th>
+                            <th>Batch Name</th>
+                            <th>Course</th>
+                            <th>Stream</th>
+                            <th>Start Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for batch in batches %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><strong>{{ batch.batchcode }}</strong></td>
+                            <td>{{ batch.batchname }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ batch.course.coursename }}</span>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ batch.course.stream.stream_name }}</small>
+                            </td>
+                            <td>
+                                {% if batch.startdate %}
+                                    {{ batch.startdate|date:"d M Y" }}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if batch.status == "Open" %}
+                                    <span class="badge bg-success">Open</span>
+                                {% elif batch.status == "Closed" %}
+                                    <span class="badge bg-danger">Closed</span>
+                                {% elif batch.status == "In Progress" %}
+                                    <span class="badge bg-warning">In Progress</span>
+                                {% elif batch.status == "Completed" %}
+                                    <span class="badge bg-secondary">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-info">{{ batch.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editBatchModal{{ batch.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        onclick="confirmDelete('{{ batch.id }}', '{{ batch.batchname }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No batches found</h5>
+                <p class="text-muted">Click "Add New Batch" to create your first batch</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Batch Modal -->
+<div class="modal fade" id="addBatchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Batch
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'add_batch' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Batch Code Field -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.batchcode.label }}</label>
+                        {{ form.batchcode }}
+                        {% if form.batchcode.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.batchcode.errors %}
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">Unique batch code (e.g., B2025, JAN25)</div>
+                    </div>
+                    
+                    <!-- Batch Name Field -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.batchname.label }}</label>
+                        {{ form.batchname }}
+                        {% if form.batchname.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.batchname.errors %}
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Course Field -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.course.label }}</label>
+                        {{ form.course }}
+                        {% if form.course.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.course.errors %}
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Start Date Field -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.startdate.label }}</label>
+                        {{ form.startdate }}
+                        {% if form.startdate.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.startdate.errors %}
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">Select batch start date</div>
+                    </div>
+                    
+                    <!-- Status Field -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.status.errors %}
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Batch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Batch Modals -->
+{% for batch in batches %}
+<div class="modal fade" id="editBatchModal{{ batch.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Batch: {{ batch.batchname }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'edit_batch' batch.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Batch Code *</label>
+                        <input type="text" class="form-control" name="batchcode" 
+                               value="{{ batch.batchcode }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Batch Name *</label>
+                        <input type="text" class="form-control" name="batchname" 
+                               value="{{ batch.batchname }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Course *</label>
+                        <select class="form-control" name="course" required>
+                            <option value="">Select Course</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}" 
+                                    {% if batch.course.id == course.id %}selected{% endif %}>
+                                {{ course.coursename }} ({{ course.stream.stream_name }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" name="startdate" 
+                               value="{{ batch.startdate|date:'Y-m-d' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" name="status">
+                            <option value="Open" {% if batch.status == "Open" %}selected{% endif %}>Open</option>
+                            <option value="In Progress" {% if batch.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                            <option value="Closed" {% if batch.status == "Closed" %}selected{% endif %}>Closed</option>
+                            <option value="Completed" {% if batch.status == "Completed" %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Batch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete batch: <strong id="deleteBatchName"></strong>?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    This action cannot be undone. All related student enrollments will be affected.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .badge {
+        padding: 0.4em 0.8em;
+        font-size: 0.85em;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .text-muted {
+        font-size: 0.9em;
+    }
+</style>
+
+<script>
+    function confirmDelete(id, name) {
+        document.getElementById('deleteBatchName').textContent = name;
+        document.getElementById('deleteForm').action = `/admin/batches/delete/${id}/`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+    
+    // Auto-uppercase for batch code
+    document.addEventListener('DOMContentLoaded', function() {
+        // For add form
+        const addBatchCode = document.getElementById('{{ form.batchcode.id_for_label }}');
+        if (addBatchCode) {
+            addBatchCode.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        }
+        
+        // For edit forms
+        const editBatchCodes = document.querySelectorAll('input[name="batchcode"]');
+        editBatchCodes.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+        
+        // Auto-hide alerts after 3 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                bootstrap.Alert.getInstance(alert)?.close();
+            });
+        }, 3000);
+    });
+</script>
+{% endblock %}

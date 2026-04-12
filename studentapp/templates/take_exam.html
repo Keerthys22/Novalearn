@@ -1,0 +1,387 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-fluid py-3">
+    <!-- Timer Bar -->
+    <div class="fixed-top bg-white shadow-sm" style="top: 60px; z-index: 1030;">
+        <div class="container-fluid">
+            <div class="row align-items-center py-2">
+                <div class="col-md-6">
+                    <h5 class="mb-0">
+                        <i class="fas fa-pencil-alt text-primary me-2"></i>
+                        {{ exam.examcode }} - {{ batch.course.coursename }}
+                    </h5>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="timer-display" id="timer">
+                        <i class="fas fa-clock text-danger me-2"></i>
+                        <span id="minutes">00</span>:<span id="seconds">00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Exam Content -->
+    <div class="container mt-5 pt-4">
+        <div class="row">
+            <!-- Questions Column -->
+            <div class="col-md-8">
+                <form id="examForm" method="POST" action="{% url 'submit_exam' batch.id exam.id %}">
+                    {% csrf_token %}
+                    
+                    {% for item in questions %}
+                    <div class="card mb-4 shadow-sm" id="question-{{ forloop.counter }}">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold">Question {{ forloop.counter }} of {{ total_questions }}</span>
+                                <span class="badge bg-primary">{{ marks_per_question }} mark(s)</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="fw-bold mb-3">{{ item.question.question }}</p>
+                            
+                            {% for option in item.options %}
+                            <div class="form-check mb-2 p-2 border rounded option-hover">
+                                <input class="form-check-input" type="radio" 
+                                       name="question_{{ item.question.id }}" 
+                                       id="q{{ item.question.id }}_o{{ option.id }}" 
+                                       value="{{ option.id }}"
+                                       {% if option.id in selected_options %}checked{% endif %}>
+                                <label class="form-check-label w-100" for="q{{ item.question.id }}_o{{ option.id }}">
+                                    {{ option.option }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Hidden submit button for auto-submit -->
+                    <button type="submit" id="hiddenSubmitBtn" style="display: none;"></button>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 mb-4">
+                        <button type="button" class="btn btn-success btn-lg" onclick="confirmSubmit()">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Exam
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Question Palette Column -->
+            <div class="col-md-4">
+                <div class="card shadow-sm sticky-top" style="top: 120px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-th me-2"></i>Question Palette</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            {% for i in question_range %}
+                            <div class="col-3">
+                                <button type="button" class="btn btn-outline-secondary w-100 palette-btn" 
+                                        onclick="scrollToQuestion({{ i }})"
+                                        id="palette-{{ i }}">
+                                    {{ i }}
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="small">
+                            <p class="mb-1"><span class="badge bg-success">&nbsp;&nbsp;&nbsp;</span> Answered</p>
+                            <p class="mb-1"><span class="badge bg-secondary">&nbsp;&nbsp;&nbsp;</span> Not Answered</p>
+                            <p class="mb-3"><span class="badge bg-warning">&nbsp;&nbsp;&nbsp;</span> Current Question</p>
+                            
+                            <div class="d-flex justify-content-between">
+                                <span>Answered:</span>
+                                <span class="fw-bold" id="answeredCount">0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Remaining:</span>
+                                <span class="fw-bold" id="remainingCount">{{ total_questions }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        padding-top: 100px;
+    }
+    
+    .timer-display {
+        font-size: 24px;
+        font-weight: bold;
+        color: #dc3545;
+        background: #fff;
+        padding: 5px 15px;
+        border-radius: 5px;
+        display: inline-block;
+    }
+    
+    .option-hover:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+        border-color: #0d6efd !important;
+    }
+    
+    .form-check-input:checked + .form-check-label {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    
+    .palette-btn {
+        margin-bottom: 5px;
+    }
+    
+    .palette-btn.answered {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .palette-btn.current {
+        background-color: #ffc107;
+        color: black;
+        border-color: #ffc107;
+    }
+    
+    .fixed-top {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    /* Auto-submit overlay animation */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .position-fixed.top-50.start-50 {
+        animation: pulse 1.5s infinite;
+        border: 2px solid #ffc107;
+    }
+</style>
+
+<script>
+    // Timer functionality
+    let totalSeconds = {{ exam.duration }} * 60;
+    let timerInterval;
+    let isSubmitting = false; // Flag to prevent multiple submissions
+    
+    // Get CSRF token from the form
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+    
+    function startTimer() {
+        timerInterval = setInterval(function() {
+            if (totalSeconds <= 0) {
+                // Time's up - auto submit
+                clearInterval(timerInterval);
+                autoSubmitExam();
+                return;
+            }
+            
+            totalSeconds--;
+            
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+            
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            
+            // Warning at 5 minutes
+            if (totalSeconds === 300) {
+                showWarning('5 minutes remaining!');
+            }
+            
+            // Warning at 1 minute
+            if (totalSeconds === 60) {
+                showWarning('1 minute remaining! Hurry up!');
+                // Change timer color to red
+                document.getElementById('timer').style.color = '#dc3545';
+                document.getElementById('timer').style.fontWeight = 'bold';
+            }
+        }, 1000);
+    }
+    
+    function showWarning(message) {
+        // Create a toast notification
+        let toast = document.createElement('div');
+        toast.className = 'position-fixed top-0 end-0 p-3';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <div class="toast show" role="alert">
+                <div class="toast-header bg-warning text-white">
+                    <strong class="me-auto">Time Warning</strong>
+                    <button type="button" class="btn-close" onclick="this.parentElement.parentElement.parentElement.remove()"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.remove();
+            }
+        }, 5000);
+    }
+    
+    function autoSubmitExam() {
+        if (isSubmitting) return; // Prevent multiple submissions
+        isSubmitting = true;
+        
+        // Show auto-submit message
+        let alertDiv = document.createElement('div');
+        alertDiv.className = 'position-fixed top-50 start-50 translate-middle p-4 bg-warning text-dark rounded shadow-lg';
+        alertDiv.style.zIndex = '10000';
+        alertDiv.innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border mb-3" role="status"></div>
+                <h4>Time's Up!</h4>
+                <p>Your exam is being submitted automatically...</p>
+            </div>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Disable all inputs to prevent further changes
+        document.querySelectorAll('input, button').forEach(el => {
+            el.disabled = true;
+        });
+        
+        // Submit the form using the hidden submit button
+        setTimeout(function() {
+            document.getElementById('hiddenSubmitBtn').click();
+        }, 1000);
+    }
+    
+    window.onload = function() {
+        startTimer();
+        updatePalette();
+        
+        // Add beforeunload warning
+        window.addEventListener('beforeunload', function(e) {
+            if (!isSubmitting && totalSeconds > 0) {
+                e.preventDefault();
+                e.returnValue = 'WARNING: Refreshing will reshuffle your questions and you may lose your progress. Are you sure?';
+            }
+        });
+    };
+    
+    // Question palette functionality
+    function scrollToQuestion(num) {
+        document.getElementById('question-' + num).scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Track answered questions
+    function updatePalette() {
+        let answered = 0;
+        let total = {{ total_questions }};
+        
+        for (let i = 1; i <= total; i++) {
+            let currentCard = document.getElementById('question-' + i);
+            
+            if (currentCard) {
+                let radios = currentCard.querySelectorAll('input[type="radio"]');
+                let isAnswered = false;
+                
+                radios.forEach(radio => {
+                    if (radio.checked) {
+                        isAnswered = true;
+                    }
+                });
+                
+                let paletteBtn = document.getElementById('palette-' + i);
+                if (isAnswered) {
+                    paletteBtn.classList.add('answered');
+                    paletteBtn.classList.remove('btn-outline-secondary');
+                    answered++;
+                } else {
+                    paletteBtn.classList.remove('answered');
+                    paletteBtn.classList.add('btn-outline-secondary');
+                }
+            }
+        }
+        
+        document.getElementById('answeredCount').textContent = answered;
+        document.getElementById('remainingCount').textContent = total - answered;
+    }
+    
+    // Add event listeners to all radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', updatePalette);
+    });
+    
+    // Initial palette update
+    updatePalette();
+    
+    // Highlight current question on scroll
+    window.addEventListener('scroll', function() {
+        let questionCards = document.querySelectorAll('[id^="question-"]');
+        let scrollPosition = window.scrollY + 150;
+        
+        questionCards.forEach((card, index) => {
+            let i = index + 1;
+            let paletteBtn = document.getElementById('palette-' + i);
+            
+            if (card.offsetTop <= scrollPosition && card.offsetTop + card.offsetHeight > scrollPosition) {
+                paletteBtn.classList.add('current');
+            } else {
+                paletteBtn.classList.remove('current');
+            }
+        });
+    });
+    
+    // Confirm submission
+    function confirmSubmit() {
+        let answered = document.getElementById('answeredCount').textContent;
+        let total = {{ total_questions }};
+        
+        if (isSubmitting) return; // Prevent if already submitting
+        
+        if (parseInt(answered) < total) {
+            if (!confirm(`You have answered ${answered} out of ${total} questions. Are you sure you want to submit?`)) {
+                return;
+            }
+        } else {
+            if (!confirm('Are you sure you want to submit your exam?')) {
+                return;
+            }
+        }
+        
+        // Clear timer and submit
+        clearInterval(timerInterval);
+        isSubmitting = true;
+        document.getElementById('examForm').submit();
+    }
+    
+    // Disable F5 and Ctrl+R
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+            e.preventDefault();
+            if (!isSubmitting && totalSeconds > 0) {
+                alert('Refreshing is disabled during the exam to prevent question reshuffling.');
+            }
+            return false;
+        }
+    });
+    
+    // Disable right-click (optional)
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+</script>
+{% endblock %}

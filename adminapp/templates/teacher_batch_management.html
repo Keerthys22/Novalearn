@@ -1,0 +1,534 @@
+{% extends 'adminbase.html' %}
+{% load static %}
+
+{% block content %}
+<div id="content" style="margin-top:50px;">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 text-primary">
+            <i class="fas fa-link me-2"></i>Teacher-Batch Assignments
+        </h1>
+        <div>
+            <span class="badge bg-primary me-2">{{ total_batches }} Batches</span>
+            <span class="badge bg-success me-2">{{ total_assignments }} Assignments</span>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Filter by Stream:</label>
+                    <select class="form-control" id="streamFilter" onchange="filterByStream()">
+                        <option value="">All Streams</option>
+                        {% for stream in streams %}
+                        <option value="{{ stream.id }}">{{ stream.stream_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Search Batch:</label>
+                    <input type="text" class="form-control" id="batchSearch" 
+                           placeholder="Search by batch name or code..." onkeyup="searchBatch()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batches Grid -->
+    <div class="row" id="batchContainer">
+        {% for item in batch_list %}
+        {% with batch=item.batch teachers=item.teachers teacher_count=item.teacher_count %}
+        <div class="col-md-6 mb-4 batch-card" data-stream="{{ batch.course.stream.id }}">
+            <div class="card h-100 shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">{{ batch.batchname }}</h5>
+                        <small class="text-muted">Code: {{ batch.batchcode }}</small>
+                    </div>
+                    <span class="badge bg-info">{{ batch.course.stream.stream_name }}</span>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Course Info -->
+                    <div class="mb-3">
+                        <p class="mb-1">
+                            <strong>Course:</strong> {{ batch.course.coursename }}
+                        </p>
+                        <p class="mb-1">
+                            <strong>Stream:</strong> {{ batch.course.stream.stream_name }}
+                        </p>
+                        <p class="mb-0">
+                            <strong>Duration:</strong> {{ batch.course.durationweeks }} weeks
+                        </p>
+                    </div>
+
+                    <!-- Assigned Teachers -->
+                    <div class="mb-3">
+                        <h6 class="border-bottom pb-2">
+                            <i class="fas fa-chalkboard-teacher me-1"></i>Assigned Teachers
+                            <span class="badge bg-secondary ms-1">
+                                {{ teacher_count }}
+                            </span>
+                        </h6>
+                        
+                        {% if teacher_count > 0 %}
+                            <div class="teacher-list">
+                                {% for teacher_item in teachers %}
+                                {% with teacher=teacher_item.teacher assignment_id=teacher_item.assignment_id %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                    <div>
+                                        <strong>{{ teacher.firstname }} {{ teacher.lastname }}</strong>
+                                        <div class="small text-muted">
+                                            {{ teacher.qualification }} | {{ teacher.experienceyear }} yrs exp
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-warning me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#replaceTeacherModal{{ batch.id }}_{{ teacher.id }}">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </button>
+                                        <form method="POST" action="{% url 'manage_teacher_batches' %}" 
+                                              class="d-inline" onsubmit="return confirm('Remove this teacher?')">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="assignment_id" value="{{ assignment_id }}">
+                                            <input type="hidden" name="remove_assignment" value="true">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endwith %}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-3 bg-light rounded">
+                                <i class="fas fa-user-slash fa-2x text-muted mb-2"></i>
+                                <p class="text-muted mb-0">No teachers assigned</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Assign Teacher Button -->
+                    <div class="text-center">
+                        <button class="btn btn-primary w-100" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#assignTeacherModal{{ batch.id }}"
+                                onclick="loadTeachersForStream('{{ batch.course.stream.id }}', '{{ batch.id }}')">
+                            <i class="fas fa-plus me-1"></i>
+                            {% if teacher_count > 0 %}
+                                Add Another Teacher
+                            {% else %}
+                                Assign Teacher
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-book fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Batches Found</h4>
+            <p class="text-muted">Create batches first to assign teachers.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Batches</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_batches }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-book fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Assigned Batches</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ assigned_batches_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-link fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Available Teachers</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ teachers_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Unassigned Batches</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ unassigned_batches }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ADD TEACHER MODALS -->
+{% for item in batch_list %}
+{% with batch=item.batch %}
+<div class="modal fade" id="assignTeacherModal{{ batch.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    {% if item.teacher_count > 0 %}
+                        Add Another Teacher to {{ batch.batchname }}
+                    {% else %}
+                        Assign Teacher to {{ batch.batchname }}
+                    {% endif %}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'manage_teacher_batches' %}">
+                {% csrf_token %}
+                <input type="hidden" name="assign_teacher" value="true">
+                <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Teacher from {{ batch.course.stream.stream_name }}:</label>
+                        <select class="form-control" name="teacher" id="teacherSelect{{ batch.id }}" required>
+                            <option value="">Loading teachers...</option>
+                        </select>
+                    </div>
+                    <div id="teacherInfo{{ batch.id }}" class="bg-light p-3 rounded mt-3" style="display: none;">
+                        <!-- Teacher info will be displayed here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        {% if item.teacher_count > 0 %}
+                            Add Teacher
+                        {% else %}
+                            Assign Teacher
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% endfor %}
+
+<!-- REPLACE TEACHER MODALS -->
+{% for item in batch_list %}
+{% with batch=item.batch %}
+{% if item.teacher_count > 0 %}
+    {% for teacher_item in item.teachers %}
+    {% with teacher=teacher_item.teacher %}
+    <div class="modal fade" id="replaceTeacherModal{{ batch.id }}_{{ teacher.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exchange-alt me-2"></i>Replace Teacher for {{ batch.batchname }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'replace_teacher_assignment' batch.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="old_teacher_id" value="{{ teacher.id }}">
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <p>Replacing: <strong>{{ teacher.firstname }} {{ teacher.lastname }}</strong></p>
+                            <p class="mb-0">Current: {{ teacher.qualification }} | {{ teacher.experienceyear }} yrs exp</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Select New Teacher:</label>
+                            <select class="form-control" name="new_teacher_id" id="replaceTeacherSelect{{ batch.id }}_{{ teacher.id }}" required>
+                                <option value="">Loading teachers...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Replace Teacher</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+{% endif %}
+{% endwith %}
+{% endfor %}
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove this teacher from the batch?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .batch-card {
+        transition: transform 0.3s;
+    }
+    
+    .batch-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,.125);
+    }
+    
+    .teacher-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .badge {
+        font-weight: 500;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .stat-card {
+        border-radius: 10px;
+        border: none;
+    }
+    
+    .border-left-primary {
+        border-left: 4px solid #4e73df !important;
+    }
+    
+    .border-left-success {
+        border-left: 4px solid #1cc88a !important;
+    }
+    
+    .border-left-info {
+        border-left: 4px solid #36b9cc !important;
+    }
+    
+    .border-left-warning {
+        border-left: 4px solid #f6c23e !important;
+    }
+</style>
+
+<!-- JavaScript -->
+<script>
+    // Load teachers for a specific stream
+    function loadTeachersForStream(streamId, batchId) {
+        const teacherSelect = document.getElementById(`teacherSelect${batchId}`);
+        const teacherInfo = document.getElementById(`teacherInfo${batchId}`);
+        
+        if (streamId) {
+            fetch(`/admin/get-teachers-by-stream/?stream_id=${streamId}`)
+                .then(response => response.json())
+                .then(data => {
+                    teacherSelect.innerHTML = '<option value="">--- Select Teacher ---</option>';
+                    data.teachers.forEach(teacher => {
+                        const option = document.createElement('option');
+                        option.value = teacher.id;
+                        option.textContent = `${teacher.name} (${teacher.qualification}, ${teacher.experience}yrs)`;
+                        option.setAttribute('data-teacher', JSON.stringify(teacher));
+                        teacherSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading teachers:', error);
+                    teacherSelect.innerHTML = '<option value="">Error loading teachers</option>';
+                });
+        }
+    }
+    
+    // Show teacher info when selected
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-hide alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                bootstrap.Alert.getInstance(alert)?.close();
+            });
+        }, 5000);
+        
+        // Teacher info display for assign modals
+        document.querySelectorAll('[id^="teacherSelect"]').forEach(select => {
+            select.addEventListener('change', function() {
+                const batchId = this.id.replace('teacherSelect', '');
+                const teacherInfo = document.getElementById(`teacherInfo${batchId}`);
+                const selectedOption = this.options[this.selectedIndex];
+                
+                if (selectedOption.value && selectedOption.dataset.teacher) {
+                    const teacher = JSON.parse(selectedOption.dataset.teacher);
+                    teacherInfo.innerHTML = `
+                        <h6>Teacher Information:</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${teacher.name}</p>
+                        <p class="mb-1"><strong>Qualification:</strong> ${teacher.qualification}</p>
+                        <p class="mb-0"><strong>Experience:</strong> ${teacher.experience} years</p>
+                    `;
+                    teacherInfo.style.display = 'block';
+                } else {
+                    teacherInfo.style.display = 'none';
+                }
+            });
+        });
+        
+        // Load teachers for replace modals when they open
+        document.querySelectorAll('[id^="replaceTeacherModal"]').forEach(modal => {
+            modal.addEventListener('show.bs.modal', function(event) {
+                const modalId = this.id;
+                const parts = modalId.split('_');
+                const batchId = parts[0].replace('replaceTeacherModal', '');
+                const teacherId = parts[1];
+                const selectId = `replaceTeacherSelect${batchId}_${teacherId}`;
+                const selectElement = document.getElementById(selectId);
+                
+                // Get the stream from the batch card
+                const batchCard = document.querySelector(`.batch-card[data-stream]`);
+                if (batchCard) {
+                    const streamId = batchCard.dataset.stream;
+                    
+                    if (streamId && selectElement) {
+                        fetch(`/admin/get-teachers-by-stream/?stream_id=${streamId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                selectElement.innerHTML = '<option value="">--- Select New Teacher ---</option>';
+                                data.teachers.forEach(teacher => {
+                                    if (teacher.id != teacherId) {
+                                        const option = document.createElement('option');
+                                        option.value = teacher.id;
+                                        option.textContent = `${teacher.name} (${teacher.qualification}, ${teacher.experience}yrs)`;
+                                        selectElement.appendChild(option);
+                                    }
+                                });
+                            });
+                    }
+                }
+            });
+        });
+    });
+    
+    // Filter batches by stream
+    function filterByStream() {
+        const streamId = document.getElementById('streamFilter').value;
+        const batchCards = document.querySelectorAll('.batch-card');
+        
+        batchCards.forEach(card => {
+            if (!streamId || card.dataset.stream === streamId) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Search batches
+    function searchBatch() {
+        const searchTerm = document.getElementById('batchSearch').value.toLowerCase();
+        const batchCards = document.querySelectorAll('.batch-card');
+        
+        batchCards.forEach(card => {
+            const batchName = card.querySelector('.card-header h5').textContent.toLowerCase();
+            const batchCode = card.querySelector('.card-header small').textContent.toLowerCase();
+            
+            if (batchName.includes(searchTerm) || batchCode.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Enhanced delete confirmation
+    function confirmDelete(formElement) {
+        // Use Bootstrap's modal for delete confirmation
+        const deleteForm = document.getElementById('deleteForm');
+        deleteForm.action = formElement.action;
+        deleteForm.innerHTML = formElement.innerHTML;
+        
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+        return false;
+    }
+</script>
+{% endblock %}

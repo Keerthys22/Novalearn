@@ -1,0 +1,228 @@
+{% extends 'indexnav.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .page-header {
+        background: linear-gradient(rgba(24, 29, 56, .7), rgba(24, 29, 56, .7)), url('{% static "mainstyle/img/carousel-1.jpg" %}');
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    
+    .team-item {
+        transition: .5s;
+    }
+    
+    .team-item:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 0 30px rgba(0, 0, 0, .1);
+    }
+    
+    .team-item .team-social {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 187, 204, .7);
+        transition: .5s;
+        opacity: 0;
+    }
+    
+    .team-item:hover .team-social {
+        opacity: 1;
+    }
+    
+    .feature-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        border: 2px solid var(--primary);
+        border-radius: 50%;
+        color: var(--primary);
+        font-size: 40px;
+        line-height: 0;
+        transition: .5s;
+    }
+    
+    .feature-item:hover .feature-icon {
+        background: var(--primary);
+        color: #fff;
+    }
+    
+    .counter-box {
+        border: 1px solid rgba(255,255,255,.2);
+        transition: .3s;
+    }
+    
+    .counter-box:hover {
+        background: rgba(255,255,255,.1);
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+    <!-- Header Start -->
+    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="display-3 text-white animated slideInDown">About Us</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a class="text-white" href="{% url 'index' %}">Home</a></li>
+                            <li class="breadcrumb-item text-white active" aria-current="page">About</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+    <!-- About Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
+                    <div class="position-relative h-100">
+                        <img class="img-fluid position-absolute w-100 h-100" src="{% static 'mainstyle/img/about.jpg' %}" alt="" style="object-fit: cover;">
+                    </div>
+                </div>
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <h6 class="section-title bg-white text-start text-primary pe-3">About Us</h6>
+                    <h1 class="mb-4">Welcome to NovaLearn</h1>
+                    <p class="mb-4">NovaLearn is a premier online learning platform dedicated to providing high-quality education accessible to everyone, everywhere. Our mission is to empower individuals with the knowledge and skills they need to succeed in today's fast-paced world.</p>
+                    <p class="mb-4">Founded in 2023, we have quickly grown to become a trusted name in online education, offering a wide range of courses across various disciplines including technology, business, arts, and sciences. Our platform brings together expert instructors, innovative teaching methods, and a supportive learning community.</p>
+                    
+                    <div class="row gy-2 gx-4 mb-4">
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Expert Instructors</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Flexible Learning</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Affordable Courses</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Certification</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>24/7 Support</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Career Guidance</p>
+                        </div>
+                    </div>
+                    
+                    <a class="btn btn-primary py-3 px-5 mt-2" href="{% url 'studentreg' %}">Join Us Today</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- About End -->
+
+    <!-- Stats Counter Start -->
+    <div class="container-xxl py-5 bg-primary">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="counter-box text-center p-4">
+                        <i class="fa fa-users fa-3x text-white mb-3"></i>
+                        <h2 class="text-white mb-2" data-toggle="counter-up">15000</h2>
+                        <p class="text-white mb-0">Happy Students</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="counter-box text-center p-4">
+                        <i class="fa fa-chalkboard-teacher fa-3x text-white mb-3"></i>
+                        <h2 class="text-white mb-2" data-toggle="counter-up">250</h2>
+                        <p class="text-white mb-0">Expert Teachers</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="counter-box text-center p-4">
+                        <i class="fa fa-book fa-3x text-white mb-3"></i>
+                        <h2 class="text-white mb-2" data-toggle="counter-up">500</h2>
+                        <p class="text-white mb-0">Available Courses</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="counter-box text-center p-4">
+                        <i class="fa fa-award fa-3x text-white mb-3"></i>
+                        <h2 class="text-white mb-2" data-toggle="counter-up">50</h2>
+                        <p class="text-white mb-0">Awards Won</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Stats Counter End -->
+
+    <!-- Features Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="row g-5">
+                <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <h6 class="section-title bg-white text-start text-primary pe-3">Why Choose Us</h6>
+                    <h1 class="mb-4">What Makes NovaLearn Different?</h1>
+                    <p class="mb-4">We believe in creating an exceptional learning experience that goes beyond traditional education. Our platform combines cutting-edge technology with proven teaching methodologies to deliver results.</p>
+                    
+                    <div class="row gy-4">
+                        <div class="col-12">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="feature-icon">
+                                        <i class="fa fa-graduation-cap"></i>
+                                    </div>
+                                </div>
+                                <div class="ms-4">
+                                    <h4>Expert-Led Courses</h4>
+                                    <p class="mb-0">Learn from industry professionals and experienced educators who bring real-world knowledge to every lesson.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="feature-icon">
+                                        <i class="fa fa-clock"></i>
+                                    </div>
+                                </div>
+                                <div class="ms-4">
+                                    <h4>Flexible Learning Schedule</h4>
+                                    <p class="mb-0">Study at your own pace with 24/7 access to course materials. Perfect for working professionals and students.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="feature-icon">
+                                        <i class="fa fa-certificate"></i>
+                                    </div>
+                                </div>
+                                <div class="ms-4">
+                                    <h4>Industry-Recognized Certificates</h4>
+                                    <p class="mb-0">Earn certificates that are valued by employers and can boost your career prospects.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <!-- Features End -->
+
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">My Courses</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_classes' batch.id %}">{{ batch.course.coursename }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_exams' batch.id %}">Exams</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Exam Result</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <!-- Result Card -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header {% if percentage >= 40 %}bg-success{% else %}bg-danger{% endif %} text-white">
+                        <h4 class="mb-0">
+                            <i class="fas {% if percentage >= 40 %}fa-check-circle{% else %}fa-times-circle{% endif %} me-2"></i>
+                            Exam Result - {{ exam.examcode }}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Score Summary -->
+                        <div class="text-center mb-4">
+                            <h1 class="display-1 {% if percentage >= 40 %}text-success{% else %}text-danger{% endif %}">
+                                {{ percentage|floatformat:1 }}%
+                            </h1>
+                            <h4>Your Score: {{ score }}/{{ total_questions }}</h4>
+                            <h5 class="{% if percentage >= 40 %}text-success{% else %}text-danger{% endif %}">
+                                {% if percentage >= 40 %}
+                                    <i class="fas fa-trophy me-2"></i>Congratulations! You Passed
+                                {% else %}
+                                    <i class="fas fa-frown me-2"></i>Better Luck Next Time
+                                {% endif %}
+                            </h5>
+                        </div>
+
+                        <!-- Detailed Statistics -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 class="text-success">{{ correct_count }}</h3>
+                                        <small class="text-muted">Correct Answers</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 class="text-danger">{{ wrong_count }}</h3>
+                                        <small class="text-muted">Wrong Answers</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h3 class="text-secondary">{{ unattempted }}</h3>
+                                        <small class="text-muted">Not Attempted</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Answers Button -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#answersSection">
+                                <i class="fas fa-eye me-2"></i>View Detailed Answers
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Answers Section -->
+                <div class="collapse" id="answersSection">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detailed Answers</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for item in detailed_results %}
+                            <div class="card mb-3 {% if item.is_correct %}border-success{% else %}border-danger{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">Question {{ forloop.counter }}</h6>
+                                    <p class="mb-3">{{ item.question.question }}</p>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Your Answer:</strong>
+                                            <p class="{% if item.is_correct %}text-success{% else %}text-danger{% endif %}">
+                                                {% if item.selected_option %}
+                                                    {{ item.selected_option.option }}
+                                                {% else %}
+                                                    <em class="text-muted">Not attempted</em>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Correct Answer:</strong>
+                                            <p class="text-success">
+                                                {% if item.correct_option %}
+                                                    {{ item.correct_option.option }}
+                                                {% else %}
+                                                    <em class="text-muted">No correct answer set</em>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-2">
+                                        {% if item.is_correct %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>Correct (+1)
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>Incorrect (0)
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'batch_exams' batch.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Exams
+                    </a>
+                    <a href="{% url 'batch_classes' batch.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-2"></i>Go to Classes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

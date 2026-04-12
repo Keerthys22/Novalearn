@@ -1,0 +1,336 @@
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .content-title h2 {
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .content-title p {
+        color: var(--text-light);
+        margin-top: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .batch-info {
+        background-color: var(--primary-light);
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .answer-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .doubt-header {
+        background: linear-gradient(135deg, var(--primary-color), #0056b3);
+        color: white;
+        padding: 20px;
+    }
+    
+    .doubt-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+    }
+    
+    .doubt-header p {
+        margin: 5px 0 0;
+        opacity: 0.9;
+    }
+    
+    .student-info {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .student-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.5rem;
+    }
+    
+    .student-details h4 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .student-details p {
+        margin: 5px 0 0;
+        color: var(--text-light);
+    }
+    
+    .doubt-question {
+        padding: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .doubt-question h5 {
+        color: var(--text-dark);
+        margin-bottom: 15px;
+    }
+    
+    .question-box {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .question-box p {
+        margin: 0;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .answer-form {
+        padding: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+    
+    .btn-submit {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+    }
+    
+    .btn-submit:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-submit:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .char-count {
+        text-align: right;
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-top: 5px;
+    }
+    
+    .alert {
+        padding: 12px 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="content-header">
+    <div class="content-title">
+        <h2>Answer Doubt</h2>
+        <p>Provide your response to the student's question</p>
+    </div>
+    <a href="{% url 'lesson_doubts' lesson.id %}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left"></i> Back to Doubts
+    </a>
+</div>
+
+<!-- Display Messages -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Batch Info -->
+<div class="batch-info">
+    <i class="fas fa-users"></i>
+    <span>Batch: {{ batch.batchname }} ({{ batch.batchcode }})</span>
+</div>
+
+<div class="answer-container">
+    <div class="doubt-header">
+        <h3>{{ lesson.lessontitle }}</h3>
+        <p>Module {{ lesson.modulenumber }}: {{ lesson.moduletitle }}</p>
+    </div>
+    
+    <div class="student-info">
+        <div class="student-avatar">
+            {{ student.name|first|upper }}
+        </div>
+        <div class="student-details">
+            <h4>{{ student.name }}</h4>
+            <p><i class="fas fa-envelope me-2"></i>{{ student.email }}</p>
+        </div>
+    </div>
+    
+    <div class="doubt-question">
+        <h5><i class="fas fa-question-circle me-2 text-primary"></i>Student's Question:</h5>
+        <div class="question-box">
+            <p>{{ doubt.description }}</p>
+            <small class="text-muted mt-2 d-block">
+                <i class="fas fa-clock me-1"></i>Asked on: {{ doubt.date_submitted|date:"d M Y, h:i A" }}
+            </small>
+        </div>
+    </div>
+    
+    <div class="answer-form">
+        <form method="POST" id="answerForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="answer">
+                    <i class="fas fa-reply me-2 text-primary"></i>Your Answer:
+                </label>
+                <textarea class="form-control" id="answer" name="answer" rows="6" 
+                          placeholder="Type your answer here..." 
+                          maxlength="500" required>{% if doubt.answer %}{{ doubt.answer }}{% endif %}</textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span>/500 characters
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'lesson_doubts' lesson.id %}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> 
+                    {% if doubt.answer %}Update Answer{% else %}Submit Answer{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const answerField = document.getElementById('answer');
+        const charCount = document.getElementById('charCount');
+        const form = document.getElementById('answerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Update character count
+        function updateCharCount() {
+            const count = answerField.value.length;
+            charCount.textContent = count;
+            
+            if (count > 450) {
+                charCount.style.color = '#f57c00';
+            } else {
+                charCount.style.color = 'var(--text-light)';
+            }
+        }
+        
+        answerField.addEventListener('input', updateCharCount);
+        updateCharCount();
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!answerField.value.trim()) {
+                e.preventDefault();
+                alert('Please provide an answer');
+                return false;
+            }
+            
+            // Disable button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            return true;
+        });
+    });
+</script>
+{% endblock %}

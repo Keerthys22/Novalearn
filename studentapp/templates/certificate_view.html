@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion - {{ website_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+            .certificate-wrapper { box-shadow: none; margin: 0; padding: 0; }
+        }
+        
+        body {
+            background: #f0f2f5;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            padding: 30px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .certificate-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .certificate-container {
+            background: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .certificate-border {
+            padding: 40px;
+            border: 15px solid #06BBCC;
+            position: relative;
+        }
+        
+        .certificate-inner {
+            border: 2px solid #06BBCC;
+            padding: 40px;
+            position: relative;
+            background: white;
+        }
+        
+        /* Corner decorations */
+        .corner {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #06BBCC;
+            z-index: 10;
+        }
+        
+        .corner-tl {
+            top: 20px;
+            left: 20px;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .corner-tr {
+            top: 20px;
+            right: 20px;
+            border-left: none;
+            border-bottom: none;
+        }
+        
+        .corner-bl {
+            bottom: 20px;
+            left: 20px;
+            border-right: none;
+            border-top: none;
+        }
+        
+        .corner-br {
+            bottom: 20px;
+            right: 20px;
+            border-left: none;
+            border-top: none;
+        }
+        
+        /* Content */
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #06BBCC;
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+        }
+        
+        .certificate-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin: 20px 0 30px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            border-bottom: 2px solid #06BBCC;
+            padding-bottom: 20px;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .presented-to {
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .student-name {
+            font-size: 56px;
+            font-weight: bold;
+            color: #06BBCC;
+            text-align: center;
+            margin: 20px 0;
+            text-transform: uppercase;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+        
+        .completion-text {
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+            margin: 20px 0 10px;
+        }
+        
+        .course-name {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin: 15px 0 10px;
+            font-family: 'Arial', sans-serif;
+            word-wrap: break-word;
+        }
+        
+        .stream-name {
+            font-size: 20px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        /* Details section */
+        .details-section {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            padding: 20px 0;
+            border-top: 2px solid #06BBCC;
+            border-bottom: 2px solid #06BBCC;
+            flex-wrap: wrap;
+        }
+        
+        .detail-box {
+            text-align: center;
+            min-width: 150px;
+            padding: 10px;
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .detail-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.2;
+        }
+        
+        .grade-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #06BBCC;
+        }
+        
+        .grade-description {
+            font-size: 20px;
+            color: #666;
+            text-align: center;
+            font-style: italic;
+            margin: 20px 0 40px;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+        
+        /* Signatures */
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin: 50px 50px 30px;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .signature-item {
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .signature-line {
+            width: 200px;
+            height: 2px;
+            background: #333;
+            margin: 0 auto 10px;
+        }
+        
+        .signature-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .signature-title {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* Seal */
+        .seal {
+            position: absolute;
+            bottom: 80px;
+            right: 80px;
+            width: 100px;
+            height: 100px;
+            border: 3px solid #06BBCC;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(6, 187, 204, 0.05);
+            opacity: 0.7;
+            transform: rotate(-15deg);
+        }
+        
+        .seal i {
+            font-size: 50px;
+            color: #06BBCC;
+        }
+        
+        /* Footer */
+        .certificate-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+            font-size: 12px;
+            color: #999;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .certificate-id {
+            font-family: monospace;
+        }
+        
+        .website-url {
+            color: #06BBCC;
+            font-weight: bold;
+        }
+        
+        /* Print button */
+        .print-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #06BBCC;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(6,187,204,0.4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid white;
+        }
+        
+        .print-btn:hover {
+            background: #05a5b5;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(6,187,204,0.5);
+        }
+        
+        .back-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            padding: 15px 30px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            border: 2px solid white;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .certificate-border { padding: 20px; }
+            .certificate-inner { padding: 20px; }
+            .student-name { font-size: 36px; }
+            .course-name { font-size: 24px; }
+            .details-section { gap: 20px; }
+            .detail-value { font-size: 24px; }
+            .signatures { margin: 30px 0; }
+            .seal { width: 60px; height: 60px; bottom: 40px; right: 40px; }
+            .seal i { font-size: 30px; }
+            .print-btn, .back-btn { 
+                position: static; 
+                width: 100%; 
+                margin: 10px 0; 
+                border-radius: 0;
+            }
+            .button-container {
+                display: flex;
+                flex-direction: column;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container no-print">
+        <a href="{% url 'batch_exams' batch.id %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Exams
+        </a>
+        <button class="print-btn" onclick="window.print()">
+            <i class="fas fa-print"></i> Print / Save as PDF
+        </button>
+    </div>
+
+    <div class="certificate-wrapper">
+        <div class="certificate-container">
+            <div class="certificate-border">
+                <div class="certificate-inner">
+                    <!-- Corner decorations -->
+                    <div class="corner corner-tl"></div>
+                    <div class="corner corner-tr"></div>
+                    <div class="corner corner-bl"></div>
+                    <div class="corner corner-br"></div>
+                    
+                    <!-- Main Content -->
+                    <div class="logo">
+                        <i class="fas fa-graduation-cap"></i> {{ website_name }}
+                    </div>
+                    
+                    <div class="certificate-title">
+                        CERTIFICATE OF COMPLETION
+                    </div>
+                    
+                    <div class="presented-to">
+                        This is proudly presented to
+                    </div>
+                    
+                    <div class="student-name">
+                        {{ student.first_name }} {{ student.last_name }}
+                    </div>
+                    
+                    <div class="completion-text">
+                        for successfully completing the course
+                    </div>
+                    
+                    <div class="course-name">
+                        {{ course.coursename }}
+                    </div>
+                    
+                    <div class="stream-name">
+                        {{ stream.stream_name }}
+                    </div>
+                    
+                    <!-- Details Grid -->
+                    <div class="details-section">
+                        <div class="detail-box">
+                            <div class="detail-label">Final Score</div>
+                            <div class="detail-value">{{ final_mark }}/{{ total_marks }}</div>
+                        </div>
+                        
+                        <div class="detail-box">
+                            <div class="detail-label">Percentage</div>
+                            <div class="detail-value">{{ percentage }}%</div>
+                        </div>
+                        
+                        <div class="detail-box">
+                            <div class="detail-label">Grade</div>
+                            <div class="grade-value" style="color: {% if grade == 'F' %}#dc3545{% else %}#06BBCC{% endif %};">{{ grade }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Grade Description -->
+                    <div class="grade-description">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        Performance: {{ grade_description }}
+                        <i class="fas fa-star text-warning ms-2"></i>
+                    </div>
+                    
+                    <!-- Signatures -->
+                    <div class="signatures">
+                        <div class="signature-item">
+                            <div class="signature-line"></div>
+                            <div class="signature-name">Dr. Sarah Johnson</div>
+                            <div class="signature-title">Academic Director</div>
+                        </div>
+                        
+                        <div class="signature-item">
+                            <div class="signature-line"></div>
+                            <div class="signature-name">Prof. Michael Chen</div>
+                            <div class="signature-title">Course Coordinator</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seal -->
+                    <div class="seal">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="certificate-footer">
+                        <div class="date">
+                            <i class="far fa-calendar-alt me-1"></i> {{ completion_date|date:"F d, Y" }}
+                        </div>
+                        <div class="certificate-id">
+                            <i class="fas fa-hashtag me-1"></i> {{ certificate_id }}
+                        </div>
+                        <div class="website-url">
+                            <i class="fas fa-globe me-1"></i> www.novalearn.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions for printing -->
+    <div class="text-center text-muted mt-3 no-print small">
+        <i class="fas fa-info-circle me-1"></i>
+        Click "Print / Save as PDF" and choose "Save as PDF" to download your certificate.
+    </div>
+</body>
+</html>

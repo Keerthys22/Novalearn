@@ -1,0 +1,259 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div id="content" style="margin-top:50px; padding: 50px;">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 text-primary">
+            <i class="fas fa-file-alt me-2"></i>My Exams
+        </h1>
+        <div>
+            <span class="badge bg-primary me-2">{{ total_exams_attended }} Exams</span>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Exams Attended</h6>
+                            <h3 class="mb-0">{{ total_exams_attended }}</h3>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Score</h6>
+                            <h3 class="mb-0">{{ total_score }}/{{ total_possible }}</h3>
+                        </div>
+                        <i class="fas fa-star fa-3x text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Overall Percentage</h6>
+                            <h3 class="mb-0">{{ overall_percentage }}%</h3>
+                        </div>
+                        <i class="fas fa-chart-line fa-3x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exams List by Course -->
+    {% for data in exam_data %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>{{ data.course.coursename }}
+                </h5>
+                <span class="badge bg-light text-dark">Batch: {{ data.batch.batchname }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Course Summary -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Enrolled Date</small>
+                    <strong>{{ data.enrollment.enrollment_date|date:"d M Y" }}</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Average Score</small>
+                    <strong>{{ data.average_percentage }}%</strong>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted d-block">Total</small>
+                    <strong>{{ data.total_obtained }}/{{ data.total_possible }}</strong>
+                </div>
+            </div>
+            
+            <!-- Exams Table -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Exam Code</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Status</th>
+                            <th class="text-center">Certificate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for exam in data.exams %}
+                        <tr>
+                            <td><strong>{{ exam.exam.examcode }}</strong></td>
+                            <td>{{ exam.obtained }}/{{ exam.total }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">{{ exam.percentage }}%</span>
+                                    <div class="progress flex-grow-1" style="height: 5px;">
+                                        <div class="progress-bar {% if exam.percentage >= 40 %}bg-success{% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ exam.percentage }}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if exam.percentage >= 40 %}
+                                <span class="badge bg-success">Pass</span>
+                                {% else %}
+                                <span class="badge bg-danger">Fail</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if data.certificate_available %}
+                                <a href="{% url 'view_certificate' data.enrollment.id %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-certificate me-1"></i>View Certificate
+                                </a>
+                                {% else %}
+                                <span class="badge bg-secondary" title="Certificate available after course completion">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Certificate Download Button (if available) -->
+            {% if data.certificate_available %}
+            <div class="mt-3 text-end">
+                <a href="{% url 'view_certificate' data.enrollment.id %}" class="btn btn-primary" target="_blank">
+                    <i class="fas fa-certificate me-2"></i>View Course Certificate
+                </a>
+                <small class="text-muted ms-2">(Click to view, then print/save as PDF)</small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-5">
+        <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+        <h4 class="text-muted">No Exams Attended Yet</h4>
+        <p class="text-muted">You haven't taken any exams yet.</p>
+        <a href="{% url 'my_courses' %}" class="btn btn-primary">
+            <i class="fas fa-book me-2"></i>View My Courses
+        </a>
+    </div>
+    {% endfor %}
+
+    <!-- Information Note -->
+    <div class="card bg-light mt-4">
+        <div class="card-body">
+            <div class="d-flex">
+                <i class="fas fa-info-circle text-primary fa-2x me-3"></i>
+                <div>
+                    <h6 class="mb-2">Certificate Information</h6>
+                    <p class="small text-muted mb-0">
+                        Certificates are available only after course completion when final marks are uploaded by your instructor. 
+                        Click "View Certificate" to see your certificate, then use your browser's print option (Ctrl+P) and select "Save as PDF" to download.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .progress {
+        border-radius: 10px;
+        background-color: #eaecf4;
+    }
+    
+    .opacity-50 {
+        opacity: 0.5;
+    }
+    
+    /* Table styles */
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    /* Certificate button styling */
+    .btn-outline-primary {
+        border: 1px solid #06BBCC;
+        color: #06BBCC;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #06BBCC;
+        color: white;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #06BBCC 0%, #05a5b5 100%);
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #05a5b5 0%, #0494a3 100%);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block main %}
+<div style="padding: 20px;">
+    <!-- Page Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 5px;">My Students</h1>
+            <p style="color: #666; margin: 0;">{{ total_students }} students across {{ total_batches }} batches</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div style="background: white; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px;">
+        <form method="GET" style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 200px;">
+                <select name="course" onchange="this.form.submit()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" {% if selected_course|stringformat:"s" == course.id|stringformat:"s" %}selected{% endif %}>
+                        {{ course.coursename }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; min-width: 200px;">
+                <select name="batch" onchange="this.form.submit()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">All Batches</option>
+                    {% for batch in batches %}
+                    <option value="{{ batch.id }}" {% if selected_batch|stringformat:"s" == batch.id|stringformat:"s" %}selected{% endif %}>
+                        {{ batch.batchname }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="flex: 2; min-width: 300px;">
+                <div style="display: flex;">
+                    <input type="text" name="search" placeholder="Search by name or email..." 
+                           value="{{ search_query }}"
+                           style="flex: 1; padding: 10px; border: 1px solid #ddd; border-right: none; border-radius: 4px 0 0 4px;">
+                    <button type="submit" style="padding: 10px 20px; background: #06BBCC; color: white; border: none; border-radius: 0 4px 4px 0; cursor: pointer;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'teacher_students' %}" style="display: inline-block; padding: 10px 20px; background: #f8f9fa; color: #666; border: 1px solid #ddd; border-radius: 4px; text-decoration: none;">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Students Table -->
+    <div style="background: white; border: 1px solid #e0e0e0;">
+        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0;">
+            <h6 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">Enrolled Students</h6>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Student</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Contact</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Course/Batch</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Enrolled</th>
+                        <th style="padding: 12px 15px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 15px;">
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 35px; height: 35px; border-radius: 50%; background: #e6f7f9; display: flex; align-items: center; justify-content: center; margin-right: 10px; color: #06BBCC; font-weight: 600;">
+                                    {{ enrollment.studentid.first_name|first|upper }}{{ enrollment.studentid.last_name|first|upper }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500;">{{ enrollment.studentid.first_name }} {{ enrollment.studentid.last_name }}</div>
+                                    <small style="color: #666;">{{ enrollment.studentid.gender }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding: 15px;">
+                            <div><i class="fas fa-envelope" style="color: #06BBCC; width: 20px;"></i> {{ enrollment.studentid.login.email|truncatechars:20 }}</div>
+                            <div style="margin-top: 5px;"><i class="fas fa-phone" style="color: #06BBCC; width: 20px;"></i> {{ enrollment.studentid.phno }}</div>
+                        </td>
+                        <td style="padding: 15px;">
+                            <div style="font-weight: 500;">{{ enrollment.enrolled_batchid.course.coursename|truncatechars:30 }}</div>
+                            <small style="color: #666;">Batch: {{ enrollment.enrolled_batchid.batchname }}</small>
+                        </td>
+                        <td style="padding: 15px;">
+                            <div>{{ enrollment.enrollment_date|date:"d M Y" }}</div>
+                            <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; margin-top: 5px; {% if enrollment.course_status == 'completed' %}background: #28a745; color: white;{% else %}background: #06BBCC; color: white;{% endif %}">
+                                {{ enrollment.course_status }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <div style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
+                                <a href="{% url 'student_assignments_page' enrollment.studentid.id enrollment.enrolled_batchid.id %}" 
+                                   style="padding: 5px 10px; background: #06BBCC; color: white; border-radius: 3px; text-decoration: none; font-size: 12px;">
+                                    <i class="fas fa-file-alt me-1"></i>Assignments
+                                </a>
+                                <a href="{% url 'student_exam_marks_page' enrollment.studentid.id enrollment.enrolled_batchid.id %}" 
+                                   style="padding: 5px 10px; background: #00bcd4; color: white; border-radius: 3px; text-decoration: none; font-size: 12px;">
+                                    <i class="fas fa-chart-bar me-1"></i>Marks
+                                </a>
+                                <a href="{% url 'student_payment_page' enrollment.studentid.id enrollment.enrolled_batchid.id %}" 
+                                   style="padding: 5px 10px; background: #ff9800; color: white; border-radius: 3px; text-decoration: none; font-size: 12px;">
+                                    <i class="fas fa-credit-card me-1"></i>Payment
+                                </a>
+                                <a href="{% url 'student_final_score_page' enrollment.studentid.id enrollment.enrolled_batchid.id %}" 
+                                   style="padding: 5px 10px; background: #9c27b0; color: white; border-radius: 3px; text-decoration: none; font-size: 12px;">
+                                    <i class="fas fa-star me-1"></i>Final Score
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 40px; text-align: center; color: #666;">
+                            <i class="fas fa-users fa-3x" style="color: #ddd; margin-bottom: 15px;"></i>
+                            <p>No students found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

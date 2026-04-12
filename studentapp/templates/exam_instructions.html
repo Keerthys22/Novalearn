@@ -1,0 +1,108 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">My Courses</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_classes' batch.id %}">{{ batch.course.coursename }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'batch_exams' batch.id %}">Exams</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Exam Instructions</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Exam Instructions - {{ exam.examcode }}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Exam Details -->
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                <div class="p-3 bg-light rounded">
+                                    <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                    <h5>{{ exam.duration }} Minutes</h5>
+                                    <small class="text-muted">Duration</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="p-3 bg-light rounded">
+                                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                                    <h5>{{ exam.totalscore }} Marks</h5>
+                                    <small class="text-muted">Total Score</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="p-3 bg-light rounded">
+                                    <i class="fas fa-question-circle fa-2x text-success mb-2"></i>
+                                    <h5>{{ total_questions }} Questions</h5>
+                                    <small class="text-muted">in this Exam</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Important Instructions:</h5>
+                            <ul class="mb-0">
+                                <li>Total duration: <strong>{{ exam.duration }} minutes</strong></li>
+                                <li>Total marks: <strong>{{ exam.totalscore }}</strong></li>
+                                <li>Each question carries <strong>1 mark</strong></li>
+                                <li><strong>{{ total_questions }} questions</strong> will appear in this exam</li>
+                                <li>No negative marking for wrong answers</li>
+                                <li>Questions and options will be shuffled randomly</li>
+                                <li>You cannot pause the timer once started</li>
+                                <li>Auto-submit when time runs out</li>
+                                <li>Do NOT refresh the page during the exam</li>
+                                <li>Select one option per question</li>
+                            </ul>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-clock me-2"></i>Time Management:</h5>
+                            <p class="mb-0">You have approximately <strong>{{ time_per_question }} seconds</strong> per question. 
+                            Manage your time wisely to attempt all {{ total_questions }} questions.</p>
+                        </div>
+
+                        <!-- Checkbox for agreement -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="agreeCheck">
+                            <label class="form-check-label" for="agreeCheck">
+                                I have read and understood all the instructions.
+                            </label>
+                        </div>
+
+                        <!-- Start Exam Button -->
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'take_exam' batch.id exam.id %}" class="btn btn-primary btn-lg" id="startExamBtn" onclick="return checkAgreement()">
+                                <i class="fas fa-play-circle me-2"></i>Start Exam
+                            </a>
+                            <a href="{% url 'batch_exams' batch.id %}" class="btn btn-outline-secondary">
+                                Back to Exams
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function checkAgreement() {
+        if (!document.getElementById('agreeCheck').checked) {
+            alert('Please read and agree to the instructions before starting the exam.');
+            return false;
+        }
+        return confirm('Are you ready to start the exam? The timer will begin immediately.');
+    }
+</script>
+{% endblock %}

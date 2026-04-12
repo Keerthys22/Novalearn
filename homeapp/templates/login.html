@@ -1,0 +1,627 @@
+{% extends 'indexnav.html' %}
+{% load static %}
+
+{% block style %}
+<style>
+    .login-page {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        min-height: 100vh;
+        padding: 50px 0;
+        display: flex;
+        align-items: center;
+    }
+    .login-container {
+        max-width: 450px;
+        margin: 0 auto;
+    }
+    .login-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        background: white;
+        border: 1px solid #e9ecef;
+    }
+    .login-header {
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        color: white;
+        text-align: center;
+        padding: 40px 20px;
+    }
+    .login-logo {
+        width: 80px;
+        height: 80px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    .login-logo i {
+        font-size: 40px;
+        color: white;
+    }
+    .login-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 28px;
+    }
+    .login-header p {
+        opacity: 0.9;
+        margin: 10px 0 0;
+        font-size: 16px;
+    }
+    .login-body {
+        padding: 40px 30px;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        height: 48px;
+        background: #fff;
+    }
+    .form-control:focus {
+        border-color: #06BBCC;
+        box-shadow: 0 0 0 0.2rem rgba(6, 187, 204, 0.25);
+    }
+    .input-group {
+        position: relative;
+    }
+    .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        border-radius: 8px 0 0 8px;
+        color: #06BBCC;
+    }
+    .input-group .form-control {
+        border-left: none;
+        border-radius: 0 8px 8px 0;
+    }
+    .btn-login {
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        border: none;
+        color: white;
+        padding: 14px 30px;
+        font-weight: 600;
+        font-size: 16px;
+        border-radius: 8px;
+        width: 100%;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(6, 187, 204, 0.3);
+        color: white;
+        background: linear-gradient(135deg, #05a5b5 0%, #0494a3 100%);
+    }
+    .btn-login:active {
+        transform: translateY(0);
+    }
+    .alert {
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 12px 15px;
+        border: none;
+    }
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border-left: 4px solid #dc3545;
+    }
+    .alert-success {
+        background: rgba(6, 187, 204, 0.1);
+        color: #06BBCC;
+        border-left: 4px solid #06BBCC;
+    }
+    .forgot-password {
+        text-align: right;
+        margin-top: -10px;
+        margin-bottom: 20px;
+    }
+    .forgot-password a {
+        color: #06BBCC;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    .forgot-password a:hover {
+        color: #0494a3;
+        text-decoration: underline;
+    }
+    .register-link {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+        color: #6c757d;
+    }
+    .register-link a {
+        color: #06BBCC;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .register-link a:hover {
+        color: #0494a3;
+        text-decoration: underline;
+    }
+    .remember-me {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 5px;
+    }
+    .remember-me input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #06BBCC;
+    }
+    .remember-me label {
+        color: #6c757d;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .social-login {
+        margin-top: 25px;
+        text-align: center;
+    }
+    .social-divider {
+        position: relative;
+        text-align: center;
+        margin: 20px 0;
+        color: #6c757d;
+    }
+    .social-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e9ecef;
+        z-index: 1;
+    }
+    .social-divider span {
+        background: white;
+        padding: 0 15px;
+        position: relative;
+        z-index: 2;
+        font-size: 14px;
+    }
+    .social-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    .btn-social {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-social:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .btn-google {
+        background: #DB4437;
+    }
+    .btn-facebook {
+        background: #4267B2;
+    }
+    .btn-microsoft {
+        background: #00A4EF;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 38px;
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+    }
+    .password-toggle:hover {
+        color: #06BBCC;
+    }
+    .login-footer {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+    .login-footer a {
+        color: #06BBCC;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .login-footer a:hover {
+        color: #0494a3;
+        text-decoration: underline;
+    }
+    
+    /* Loading animation for button */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+    }
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: white;
+        border-radius: 50%;
+        animation: button-loading-spinner 1s ease infinite;
+    }
+    
+    @keyframes button-loading-spinner {
+        from {
+            transform: rotate(0turn);
+        }
+        to {
+            transform: rotate(1turn);
+        }
+    }
+    
+    /* Error states */
+    .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-image: none;
+    }
+    .form-control.is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    /* Modal styling */
+    .modal-header.bg-primary {
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%) !important;
+    }
+    
+    /* Button in modal */
+    .btn-primary {
+        background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);
+        border: none;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #05a5b5 0%, #0494a3 100%);
+        box-shadow: 0 5px 15px rgba(6, 187, 204, 0.2);
+    }
+    
+    /* Focus states for links */
+    a:focus {
+        outline: 2px solid #06BBCC;
+        outline-offset: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="login-page">
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-logo">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Welcome Back</h3>
+                    <p>Sign in to continue to NovaLearn</p>
+                </div>
+                
+                <div class="login-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if error %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    
+                    <form method="POST" id="loginForm">
+                        {% csrf_token %}
+                        
+                        <!-- Email Field -->
+                        <div class="form-group">
+                            <label class="form-label" for="id_email">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                {{ form.email }}
+                            </div>
+                            {% if form.email.errors %}
+                                {% for error in form.email.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Password Field -->
+                        <div class="form-group">
+                            <label class="form-label" for="id_password">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                {{ form.password }}
+                                <button type="button" class="password-toggle" id="passwordToggle">
+                                   
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            {% if form.non_field_errors %}
+                                {% for error in form.non_field_errors %}
+                                    <div class="error-message">
+                                        <i class="fas fa-exclamation-circle"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="remember-me">
+                                <input type="checkbox" id="rememberMe" name="remember">
+                                <label for="rememberMe">Remember me</label>
+                            </div>
+                            <div class="forgot-password">
+                                <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-login" id="loginButton">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Sign In</span>
+                        </button>
+                        
+                        <!-- Register Link -->
+                        <div class="register-link">
+                            Don't have an account? <a href="{% url 'studentreg' %}">Register here</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="login-footer">
+                <p>© {% now "Y" %} NovaLearn. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);">
+                <h5 class="modal-title text-white">Reset Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Enter your email address and we'll send you a link to reset your password.</p>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="resetEmail" placeholder="Enter your email">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="sendResetLink()">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Toggle password visibility
+    document.getElementById('passwordToggle').addEventListener('click', function() {
+        const passwordField = document.getElementById('id_password');
+        const icon = this.querySelector('i');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+    
+    // Forgot Password Modal
+    function showForgotPassword() {
+        const modal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+        modal.show();
+    }
+    
+    function sendResetLink() {
+        const email = document.getElementById('resetEmail').value;
+        if (!email) {
+            alert('Please enter your email address.');
+            return;
+        }
+        
+        // Here you would typically make an AJAX request
+        fetch('/api/reset-password/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({email: email})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Password reset link has been sent to your email.');
+                bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
+            } else {
+                alert(data.message || 'Failed to send reset link.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    }
+    
+    // Form submission with loading state
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const loginButton = document.getElementById('loginButton');
+        const buttonText = loginButton.querySelector('span');
+        
+        // Show loading state
+        loginButton.classList.add('btn-loading');
+        buttonText.textContent = 'Signing In...';
+        loginButton.disabled = true;
+        
+        // Form validation
+        const email = document.getElementById('id_email').value;
+        const password = document.getElementById('id_password').value;
+        
+        if (!email || !password) {
+            e.preventDefault();
+            loginButton.classList.remove('btn-loading');
+            buttonText.textContent = 'Sign In';
+            loginButton.disabled = false;
+            return;
+        }
+        
+        // Form is valid, will submit
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Auto-focus email field on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailField = document.getElementById('id_email');
+        if (emailField) {
+            emailField.focus();
+        }
+        
+        // Check if there are errors and mark fields
+        const emailErrors = '{{ form.email.errors }}';
+        const passwordErrors = '{{ form.password.errors }}';
+        const nonFieldErrors = '{{ form.non_field_errors }}';
+        
+        if (emailErrors && emailErrors !== '') {
+            document.getElementById('id_email').classList.add('is-invalid');
+        }
+        if (passwordErrors && passwordErrors !== '') {
+            document.getElementById('id_password').classList.add('is-invalid');
+        }
+        if (nonFieldErrors && nonFieldErrors !== '') {
+            document.getElementById('id_email').classList.add('is-invalid');
+            document.getElementById('id_password').classList.add('is-invalid');
+        }
+        
+        // Remember me functionality
+        const rememberMe = localStorage.getItem('rememberMe');
+        const savedEmail = localStorage.getItem('savedEmail');
+        
+        if (rememberMe === 'true' && savedEmail) {
+            document.getElementById('id_email').value = savedEmail;
+            document.getElementById('rememberMe').checked = true;
+        }
+        
+        // Save email if remember me is checked
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const rememberCheckbox = document.getElementById('rememberMe');
+            const email = document.getElementById('id_email').value;
+            
+            if (rememberCheckbox.checked) {
+                localStorage.setItem('rememberMe', 'true');
+                localStorage.setItem('savedEmail', email);
+            } else {
+                localStorage.removeItem('rememberMe');
+                localStorage.removeItem('savedEmail');
+            }
+        });
+        
+        // Enter key submits form
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT' && !activeElement.type === 'button') {
+                    e.preventDefault();
+                    document.getElementById('loginForm').requestSubmit();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

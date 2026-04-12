@@ -1,0 +1,678 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">My Courses</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ batch.course.coursename }} - {{ batch.batchname }}</li>
+            </ol>
+        </nav>
+
+        <!-- Batch Header with Action Buttons -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1 class="display-6">{{ batch.course.coursename }}</h1>
+                <p class="text-muted">
+                    <i class="fas fa-layer-group me-2"></i>{{ batch.course.stream.stream_name }}
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-tag me-2"></i>Batch: {{ batch.batchname }} ({{ batch.batchcode }})
+                </p>
+                <p class="text-muted">
+                    <i class="fas fa-rupee-sign me-2"></i>Course Fee: <strong>₹ {{ batch.course.rate|floatformat:2 }}</strong>
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'payment_details' batch.id %}" class="btn btn-outline-success">
+                        <i class="fas fa-credit-card me-2"></i>Payment Details
+                    </a>
+                    <a href="{% url 'batch_exams' batch.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-pencil-alt me-2"></i>Exams
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" id="classTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="lessons-tab" data-bs-toggle="tab" data-bs-target="#lessons" 
+                        type="button" role="tab" aria-controls="lessons" aria-selected="true">
+                    <i class="fas fa-book me-2"></i>Lessons
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments" 
+                        type="button" role="tab" aria-controls="assignments" aria-selected="false">
+                    <i class="fas fa-tasks me-2"></i>Assignments
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="classTabContent">
+            <!-- Lessons Tab -->
+            <div class="tab-pane fade show active" id="lessons" role="tabpanel" aria-labelledby="lessons-tab">
+                {% if lessons %}
+                <div class="row">
+                    {% for lesson in lessons %}
+                    <div class="col-md-12 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-primary me-2">Module {{ lesson.modulenumber }}</span>
+                                        <span class="fw-bold">{{ lesson.moduletitle }}</span>
+                                    </div>
+                                    <div>
+                                        {% if lesson.videos %}
+                                        <span class="badge bg-danger me-1"><i class="fas fa-video me-1"></i>Video</span>
+                                        {% endif %}
+                                        {% if lesson.pdfnotes %}
+                                        <span class="badge bg-warning"><i class="fas fa-file-pdf me-1"></i>PDF</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ lesson.lessontitle }}</h5>
+                                
+                                <!-- Video and Notes Section -->
+                                <div class="row mb-4">
+                                    <div class="col-md-8">
+                                        {% if lesson.videos %}
+                                        <div class="video-container mb-3">
+                                            <video id="video-{{ lesson.id }}" controls style="width: 100%; max-height: 400px;" class="rounded">
+                                                <source src="{{ lesson.videos.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
+                                        {% else %}
+                                        <div class="alert alert-secondary">
+                                            <i class="fas fa-info-circle me-2"></i>No video available for this lesson.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {% if lesson.pdfnotes %}
+                                        <div class="notes-section p-3 bg-light rounded">
+                                            <h6><i class="fas fa-file-pdf text-danger me-2"></i>Notes</h6>
+                                            <a href="{{ lesson.pdfnotes.url }}" target="_blank" class="btn btn-outline-warning btn-sm w-100">
+                                                <i class="fas fa-download me-2"></i>Download Notes
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <!-- Doubt Summary Card -->
+                                        <div class="doubt-summary mt-3 p-3 bg-light rounded">
+                                            <h6><i class="fas fa-question-circle text-primary me-2"></i>Doubts</h6>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="text-muted">
+                                                    <i class="fas fa-comment me-1"></i>
+                                                    {{ lesson.doubt_count }} doubt{{ lesson.doubt_count|pluralize }}
+                                                </span>
+                                                <button class="btn btn-sm btn-outline-primary" onclick="showDoubtModal('{{ lesson.id }}', '{{ lesson.lessontitle }}')">
+                                                    <i class="fas fa-plus me-1"></i>Ask Doubt
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Doubt Section for this Lesson -->
+                                <div class="doubt-section mt-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-question-circle text-primary me-2"></i>
+                                            Questions & Doubts
+                                        </h5>
+                                        <button class="btn btn-sm btn-primary" onclick="showDoubtModal('{{ lesson.id }}', '{{ lesson.lessontitle }}')">
+                                            <i class="fas fa-plus-circle me-1"></i>Ask a Doubt
+                                        </button>
+                                    </div>
+                                    
+                                    {% if lesson.doubts %}
+                                    <div class="doubts-list">
+                                        {% for doubt in lesson.doubts %}
+                                        <div class="doubt-item card mb-3 {% if doubt.answer %}border-success{% else %}border-warning{% endif %}">
+                                            <div class="card-body">
+                                                <div class="d-flex">
+                                                    <div class="doubt-avatar me-3">
+                                                        <div class="avatar-circle bg-primary text-white">
+                                                            {{ doubt.student_enrolment_id.studentid.name|first|upper }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="doubt-content flex-grow-1">
+                                                        <div class="d-flex justify-content-between align-items-start">
+                                                            <div>
+                                                                <h6 class="mb-1">{{ doubt.student_enrolment_id.studentid.name }}</h6>
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-clock me-1"></i>{{ doubt.date_submitted|date:"d M Y, h:i A" }}
+                                                                </small>
+                                                            </div>
+                                                            <span class="badge {% if doubt.answer %}bg-success{% else %}bg-warning{% endif %}">
+                                                                {% if doubt.answer %}
+                                                                <i class="fas fa-check-circle me-1"></i>Answered
+                                                                {% else %}
+                                                                <i class="fas fa-clock me-1"></i>Pending
+                                                                {% endif %}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div class="doubt-question mt-2 p-3 bg-light rounded">
+                                                            <p class="mb-0">{{ doubt.description }}</p>
+                                                        </div>
+                                                        
+                                                        {% if doubt.answer %}
+                                                        <div class="doubt-answer mt-3 p-3 bg-success bg-opacity-10 rounded border-start border-success border-4">
+                                                            <div class="d-flex">
+                                                                <i class="fas fa-chalkboard-teacher text-success me-2 mt-1"></i>
+                                                                <div>
+                                                                    <strong class="text-success">Teacher's Response:</strong>
+                                                                    <p class="mb-1 mt-1">{{ doubt.answer }}</p>
+                                                                    <small class="text-muted">
+                                                                        <i class="fas fa-clock me-1"></i>{{ doubt.answer_submitted|date:"d M Y, h:i A" }}
+                                                                    </small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <div class="text-center py-4 bg-light rounded">
+                                        <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                                        <h6 class="text-muted">No doubts yet</h6>
+                                        <p class="small text-muted">Be the first to ask a question about this lesson</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-book-open fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted">No lessons available yet</h4>
+                    <p>Check back later for course content</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Assignments Tab (unchanged) -->
+            <div class="tab-pane fade" id="assignments" role="tabpanel" aria-labelledby="assignments-tab">
+                <!-- Your existing assignments tab content remains the same -->
+                {% if assignments %}
+                <div class="row">
+                    {% for assignment in assignments %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm {% if assignment.id in submitted_assignments %}border-success{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0">Assignment {{ forloop.counter }}</h5>
+                                    <span class="badge {% if assignment.id in submitted_assignments %}bg-success{% else %}bg-warning{% endif %}">
+                                        {% if assignment.id in submitted_assignments %}
+                                        <i class="fas fa-check-circle me-1"></i>Submitted
+                                        {% else %}
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                
+                                <p class="card-text">
+                                    <i class="fas fa-calendar-alt me-2 text-muted"></i>
+                                    <strong>Upload Date:</strong> {{ assignment.uploaddate|date:"d M Y" }}<br>
+                                    <i class="fas fa-hourglass-end me-2 text-muted"></i>
+                                    <strong>Due Date:</strong> 
+                                    <span class="{% if assignment.is_overdue and assignment.id not in submitted_assignments %}text-danger fw-bold{% endif %}">
+                                        {{ assignment.duedate|date:"d M Y" }}
+                                    </span><br>
+                                    <i class="fas fa-star me-2 text-muted"></i>
+                                    <strong>Total Marks:</strong> {{ assignment.totalmarks }}
+                                </p>
+
+                                <!-- Teacher's Assignment File Section -->
+                                {% if assignment.assignmentupload %}
+                                <div class="teacher-assignment mb-3 p-2 bg-light rounded">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <small class="text-muted d-block">Assignment File</small>
+                                            <strong>{{ assignment.assignmentupload.name|cut:"assignments/"|truncatechars:30 }}</strong>
+                                        </div>
+                                        <a href="{{ assignment.assignmentupload.url }}" target="_blank" class="btn btn-sm btn-outline-primary" download>
+                                            <i class="fas fa-download me-1"></i>Download
+                                        </a>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="teacher-assignment mb-3 p-2 bg-light rounded">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-exclamation-circle fa-2x text-warning me-3"></i>
+                                        <div class="flex-grow-1">
+                                            <small class="text-muted d-block">Assignment File</small>
+                                            <em class="text-muted">No assignment file uploaded by teacher</em>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if assignment.id in submitted_assignments %}
+                                    {% for submission_id, submission in assignment_submissions.items %}
+                                        {% if submission_id == assignment.id and submission %}
+                                            <div class="alert alert-success mb-3">
+                                                <small>
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    Submitted on: {{ submission.submitteddate|date:"d M Y, h:i A" }}
+                                                </small>
+                                                {% if submission.assigned_marks %}
+                                                <br>
+                                                <strong>Marks Obtained: {{ submission.assigned_marks }}/{{ assignment.totalmarks }}</strong>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Student's Submission File -->
+                                            <div class="student-submission mb-3 p-2 border-start border-success border-4 bg-light rounded">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-upload fa-2x text-success me-3"></i>
+                                                    <div class="flex-grow-1">
+                                                        <small class="text-muted d-block">Your Submission</small>
+                                                        <strong>{{ submission.assignmentuploaded.name|cut:"student_assignments/"|truncatechars:25 }}</strong>
+                                                    </div>
+                                                    <a href="{{ submission.assignmentuploaded.url }}" target="_blank" class="btn btn-sm btn-outline-success" download>
+                                                        <i class="fas fa-download me-1"></i>View
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% if not assignment.is_overdue %}
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'submit_assignment' batch.id assignment.id %}" class="btn btn-primary">
+                                            <i class="fas fa-upload me-2"></i>Submit Assignment
+                                        </a>
+                                    </div>
+                                    {% else %}
+                                    <button class="btn btn-secondary w-100" disabled>
+                                        <i class="fas fa-times-circle me-2"></i>Submission Closed (Overdue)
+                                    </button>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-tasks fa-4x text-muted mb-4"></i>
+                    <h4 class="text-muted">No assignments yet</h4>
+                    <p>Check back later for assignments</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ask Doubt Modal -->
+<div class="modal fade" id="askDoubtModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle me-2"></i>Ask a Doubt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'ask_doubt' %}" id="doubtForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Lesson</label>
+                        <input type="text" class="form-control" id="modalLessonTitle" readonly>
+                        <input type="hidden" name="lesson_id" id="modalLessonId">
+                        <input type="hidden" name="enrollment_id" value="{{ enrollment.id }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="doubtDescription" class="form-label fw-bold">Your Question</label>
+                        <textarea class="form-control" id="doubtDescription" name="description" rows="4" 
+                                  placeholder="Type your doubt or question here..." required></textarea>
+                        <div class="form-text">Be specific with your question for better understanding.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitDoubtBtn">
+                        <i class="fas fa-paper-plane me-2"></i>Submit Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong class="me-auto">Success</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            Your doubt has been submitted successfully!
+        </div>
+    </div>
+</div>
+
+<script>
+    function showDoubtModal(lessonId, lessonTitle) {
+        document.getElementById('modalLessonId').value = lessonId;
+        document.getElementById('modalLessonTitle').value = lessonTitle;
+        
+        var modal = new bootstrap.Modal(document.getElementById('askDoubtModal'));
+        modal.show();
+    }
+    
+    // Handle form submission
+    document.getElementById('doubtForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var submitBtn = document.getElementById('submitDoubtBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+        
+        var formData = new FormData(this);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('askDoubtModal')).hide();
+                
+                // Show success toast
+                var toast = new bootstrap.Toast(document.getElementById('successToast'));
+                toast.show();
+                
+                // Reload page after 1 second to show new doubt
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Submit Question';
+        });
+    });
+    
+    // Reset form when modal is closed
+    document.getElementById('askDoubtModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('doubtForm').reset();
+    });
+</script>
+
+
+<style>
+    .nav-tabs .nav-link {
+        color: #495057;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .border-success {
+        border: 2px solid #198754 !important;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    .nav-tabs .nav-link {
+        color: #495057;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .border-success {
+        border: 2px solid #198754 !important;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    /* New styles for assignment sections */
+    .teacher-assignment {
+        border-left: 4px solid var(--primary-color, #0d6efd);
+        transition: all 0.3s ease;
+    }
+    
+    .teacher-assignment:hover {
+        background-color: #e9ecef !important;
+    }
+    
+    .student-submission {
+        border-left: 4px solid #198754;
+        transition: all 0.3s ease;
+    }
+    
+    .student-submission:hover {
+        background-color: #d1e7dd !important;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* File type icons colors */
+    .fa-file-alt {
+        color: #0d6efd;
+    }
+    
+    .fa-upload {
+        color: #198754;
+    }
+    
+    .fa-exclamation-circle {
+        color: #ffc107;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .teacher-assignment .d-flex,
+        .student-submission .d-flex {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .teacher-assignment .btn-sm,
+        .student-submission .btn-sm {
+            width: 100%;
+        }
+    }
+
+     .nav-tabs .nav-link {
+        color: #495057;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    .card {
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .border-success {
+        border: 2px solid #198754 !important;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    /* Doubt section styles */
+    .doubt-item {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .doubt-item:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .doubt-question {
+        background-color: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .doubt-answer {
+        background-color: #f0f9f0;
+    }
+    
+    .video-container {
+        position: relative;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .doubt-summary {
+        border-left: 4px solid #0d6efd;
+    }
+    
+    .toast-container {
+        z-index: 1100;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .doubt-item .d-flex {
+            flex-direction: column;
+        }
+        
+        .doubt-avatar {
+            margin-bottom: 10px;
+        }
+    }
+    
+    /* Animation for new doubts */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .doubt-item {
+        animation: fadeIn 0.5s ease;
+    }
+
+    .btn-group .btn {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-group .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+</style>
+{% endblock %}

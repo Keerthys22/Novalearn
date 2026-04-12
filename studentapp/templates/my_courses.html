@@ -1,0 +1,325 @@
+{% extends 'studentbase.html' %}
+{% load static %}
+
+{% block student %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp mb-5">
+            <h6 class="section-title bg-white text-center text-primary px-3">My Learning</h6>
+            <h1 class="mb-3">My Courses</h1>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if enrollments %}
+            <div class="row g-4">
+                {% for enrollment in enrollments %}
+                <div class="col-lg-4 col-md-6 wow fadeInUp">
+                    <div class="course-item bg-light h-100">
+                        <div class="position-relative overflow-hidden">
+                            {% if enrollment.enrolled_batchid.course.image %}
+                            <img class="img-fluid" src="{{ enrollment.enrolled_batchid.course.image.url }}" 
+                                 alt="{{ enrollment.enrolled_batchid.course.coursename }}" 
+                                 style="width: 100%; height: 200px; object-fit: cover;">
+                            {% else %}
+                            <img class="img-fluid" src="{% static 'mainstyle/img/course-1.jpg' %}" 
+                                 alt="{{ enrollment.enrolled_batchid.course.coursename }}" 
+                                 style="width: 100%; height: 200px; object-fit: cover;">
+                            {% endif %}
+                            
+                            <div class="position-absolute top-0 end-0 mt-3 me-3">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Enrolled
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-4">
+                            <div class="mb-2">
+                                <span class="badge bg-primary">{{ enrollment.enrolled_batchid.course.stream.stream_name }}</span>
+                                <span class="badge bg-info">{{ enrollment.enrolled_batchid.batchname }}</span>
+                            </div>
+                            
+                            <h5 class="mb-3">{{ enrollment.enrolled_batchid.course.coursename }}</h5>
+                            
+                            <div class="text-start mb-3">
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    Enrolled: {{ enrollment.enrollment_date|date:"d M Y" }}
+                                </p>
+                                {% if enrollment.enrolled_batchid.startdate %}
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Starts: {{ enrollment.enrolled_batchid.startdate|date:"d M Y" }}
+                                </p>
+                                {% endif %}
+                                <p class="small text-muted mb-1">
+                                    <i class="fas fa-tag me-2"></i>
+                                    Batch Code: {{ enrollment.enrolled_batchid.batchcode }}
+                                </p>
+                                
+                                <!-- Payment Information Section -->
+                                {% if enrollment.payment %}
+                                <div class="mt-2 pt-2 border-top">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="small text-muted">
+                                            <i class="fas fa-credit-card me-1"></i>
+                                            Amount Paid:
+                                        </span>
+                                        <span class="small fw-bold text-success">₹{{ enrollment.payment.amount }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <span class="small text-muted">
+                                            <i class="fas fa-calendar me-1"></i>
+                                            Payment Date:
+                                        </span>
+                                        <span class="small">{{ enrollment.payment.paymentdate|date:"d M Y" }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <span class="small text-muted">
+                                            <i class="fas fa-credit-card me-1"></i>
+                                            Payment Mode:
+                                        </span>
+                                        <span class="small">{{ enrollment.payment.get_payment_mode_display}}</span>
+                                    </div>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success w-100">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Payment Completed
+                                        </span>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="mt-2 pt-2 border-top">
+                                    <div class="alert alert-warning py-1 px-2 mb-0 small">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Payment pending
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between border-top pt-3">
+                                <!-- Changed from View Course to Attend Class -->
+                                <a href="{% url 'batch_classes' enrollment.enrolled_batchid.id %}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-play-circle me-1"></i>Attend Class
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        onclick="cancelEnrollment('{{ enrollment.id }}', '{{ enrollment.enrolled_batchid.course.coursename }}')">
+                                    <i class="fas fa-times me-1"></i>Withdraw
+                                </button>
+                            </div>
+                            
+                            <!-- Receipt Button (if payment exists) -->
+                            {% if enrollment.payment %}
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-secondary w-100" 
+                                        onclick="showReceipt('{{ enrollment.id }}')"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#receiptModal{{ enrollment.id }}">
+                                    <i class="fas fa-receipt me-1"></i>View Receipt
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receipt Modal for each enrollment -->
+                {% if enrollment.payment %}
+                <div class="modal fade" id="receiptModal{{ enrollment.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-receipt me-2"></i>
+                                    Payment Receipt
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-4">
+                                    <i class="fas fa-check-circle text-success fa-3x mb-2"></i>
+                                    <h4>Payment Successful</h4>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td class="text-muted">Receipt No:</td>
+                                                <td class="fw-bold">#RCT{{ enrollment.id }}{{ enrollment.payment.id }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Student Name:</td>
+                                                <td>{{ enrollment.studentid.first_name }} {{ enrollment.studentid.last_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Course:</td>
+                                                <td>{{ enrollment.enrolled_batchid.course.coursename }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Batch:</td>
+                                                <td>{{ enrollment.enrolled_batchid.batchname }} ({{ enrollment.enrolled_batchid.batchcode }})</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td class="text-muted">Payment Date:</td>
+                                                <td>{{ enrollment.payment.paymentdate|date:"d M Y" }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Payment Mode:</td>
+                                                <td>{{ enrollment.payment.get_payment_mode_display}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Payment Status:</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="text-muted">Amount Paid:</td>
+                                                <td><h4 class="text-success mb-0">₹{{ enrollment.payment.amount }}</h4></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="text-center text-muted small">
+                                    <p>This is a computer generated receipt. No signature required.</p>
+                                    <p>Thank you for choosing our learning platform!</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="window.print()">
+                                    <i class="fas fa-print me-2"></i>Print Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-book-open fa-4x text-muted mb-4"></i>
+                <h4 class="text-muted">You haven't enrolled in any courses yet</h4>
+                <p class="mb-4">Start your learning journey today!</p>
+                <a href="{% url 'student_home' %}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Browse Courses
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Cancel Enrollment Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Withdrawal</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to withdraw from: <strong id="cancelCourseName"></strong>?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep it</button>
+                <form method="POST" id="cancelForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Yes, Withdraw</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cancelEnrollment(enrollmentId, courseName) {
+        document.getElementById('cancelCourseName').textContent = courseName;
+        document.getElementById('cancelForm').action = "/student/cancel-enrollment/" + enrollmentId + "/";
+        new bootstrap.Modal(document.getElementById('cancelModal')).show();
+    }
+    
+    function showReceipt(enrollmentId) {
+        console.log('Showing receipt for enrollment:', enrollmentId);
+    }
+    
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            bootstrap.Alert.getInstance(alert)?.close();
+        });
+    }, 5000);
+</script>
+
+<style>
+    /* Print styles for receipt */
+    @media print {
+        .modal-header, .modal-footer, .btn-close, .btn {
+            display: none !important;
+        }
+        .modal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            margin: 0;
+            padding: 0;
+            overflow: visible;
+        }
+        .modal-dialog {
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+        }
+        .modal-content {
+            border: none;
+            box-shadow: none;
+        }
+    }
+    
+    /* Hover effect for cards */
+    .course-item:hover {
+        transform: translateY(-5px);
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Payment info styling */
+    .border-top {
+        border-color: rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Attend Class button styling */
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+    }
+</style>
+{% endblock %}

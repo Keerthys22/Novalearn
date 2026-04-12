@@ -1,0 +1,84 @@
+{% extends 'teacherbase.html' %}
+{% load static %}
+
+{% block main %}
+<div style="padding: 20px;">
+    <!-- Header with Back Button -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div>
+            <a href="{% url 'teacher_students' %}" style="color: #666; text-decoration: none; display: inline-block; margin-bottom: 10px;">
+                <i class="fas fa-arrow-left me-2"></i>Back to Students
+            </a>
+            <h1 style="font-size: 24px; font-weight: 600; color: #333; margin: 0;">Student Exam Marks</h1>
+        </div>
+    </div>
+
+    <!-- Student Info Card -->
+    <div style="background: white; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px;">
+        <div style="display: flex; align-items: center;">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: #e6f7f9; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: #06BBCC; font-weight: 600; font-size: 18px;">
+                {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+            </div>
+            <div>
+                <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 5px 0;">{{ student.first_name }} {{ student.last_name }}</h3>
+                <p style="color: #666; margin: 0;">
+                    <span style="margin-right: 15px;"><i class="fas fa-book me-1"></i>{{ batch.course.coursename }}</span>
+                    <span><i class="fas fa-layer-group me-1"></i>Batch: {{ batch.batchname }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div style="background: white; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 600;">Average Percentage</span>
+            <span style="font-size: 24px; font-weight: 600; color: #06BBCC;">{{ avg_percentage }}%</span>
+        </div>
+    </div>
+
+    <!-- Exam Results Table -->
+    <div style="background: white; border: 1px solid #e0e0e0;">
+        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0;">
+            <h6 style="font-size: 16px; font-weight: 600; color: #333; margin: 0;">Exam Results</h6>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f8f9fa;">
+                    <tr>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Exam Code</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Total Score</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Obtained</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Percentage</th>
+                        <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #e0e0e0;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in exam_results %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 15px;">{{ result.examid.examcode }}</td>
+                        <td style="padding: 15px;">{{ result.examid.totalscore }}</td>
+                        <td style="padding: 15px;">{{ result.total_score_obtained }}</td>
+                        <td style="padding: 15px;"><strong>{{ result.percentage|floatformat:2 }}%</strong></td>
+                        <td style="padding: 15px;">
+                            {% if result.percentage >= 40 %}
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #28a745; color: white;">Pass</span>
+                            {% else %}
+                                <span style="display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; background: #dc3545; color: white;">Fail</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 40px; text-align: center; color: #666;">
+                            <p>No exam results found</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
