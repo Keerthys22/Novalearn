@@ -111,7 +111,7 @@
                         </div>
                         
                         <div class="d-grid gap-2">
-                            <a href="#{% comment %} {% url 'enroll_course' course.id %} {% endcomment %}" class="btn btn-primary btn-lg">
+                            <a href="{% url 'enroll_course' course.id %}" class="btn btn-primary btn-lg">
                                 <i class="fas fa-user-plus me-2"></i>Enroll Now
                             </a>
                             <a href="{% url 'student_home' %}" class="btn btn-outline-primary">

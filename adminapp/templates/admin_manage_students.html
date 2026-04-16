@@ -215,12 +215,7 @@
                                 <a href="{% url 'student_detail' enrollment.studentid.id %}" class="btn btn-sm btn-info" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{% url 'student_payments' enrollment.studentid.id %}" class="btn btn-sm btn-warning" title="View Payments">
-                                    <i class="fas fa-money-bill"></i>
-                                </a>
-                                <a href="{% url 'student_progress' enrollment.studentid.id enrollment.id %}" class="btn btn-sm btn-success" title="View Progress">
-                                    <i class="fas fa-chart-line"></i>
-                                </a>
+                                
                             </td>
                         </tr>
                         {% empty %}
