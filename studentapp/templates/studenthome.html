@@ -30,9 +30,9 @@
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-outline-primary filter-btn active" onclick="filterCourses('all')" data-stream="all">All Streams</button>
                         {% for stream in streams %}
-                        <button type="button" class="btn btn-outline-primary filter-btn" onclick="filterCourses('{{ stream.id }}')" data-stream="{{ stream.id }}">
+                        {% comment %} <button type="button" class="btn btn-outline-primary filter-btn" onclick="filterCourses('{{ stream.id }}')" data-stream="{{ stream.id }}">
                             {{ stream.stream_name }}
-                        </button>
+                        </button> {% endcomment %}
                         {% endfor %}
                     </div>
                 </div>

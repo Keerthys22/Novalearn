@@ -416,7 +416,7 @@
                             {% endif %}
                         </div>
                         
-                        <!-- Remember Me & Forgot Password -->
+                        {% comment %} <!-- Remember Me & Forgot Password -->
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="remember-me">
                                 <input type="checkbox" id="rememberMe" name="remember">
@@ -425,7 +425,7 @@
                             <div class="forgot-password">
                                 <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
                         
                         <!-- Submit Button -->
                         <button type="submit" class="btn-login" id="loginButton">
@@ -449,7 +449,7 @@
 </div>
 
 <!-- Forgot Password Modal -->
-<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+{% comment %} <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" style="background: linear-gradient(135deg, #06BBCC 0%, #04a5b5 100%);">
@@ -469,7 +469,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> {% endcomment %}
 
 <script>
     // Toggle password visibility
