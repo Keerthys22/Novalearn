@@ -9,12 +9,12 @@
         <h1 class="h2 text-primary">Admin Dashboard</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportData()">
-                    <i class="fas fa-download me-1"></i>Export Data
-                </button>
-                <button type="button" class="btn btn-sm btn-primary" onclick="generateReport()">
+                <a href="{% url 'export_report_pdf' %}" class="btn btn-sm btn-primary">
+    <i class="fas fa-download me-1"></i>Export Report
+</a>
+                {% comment %} <button type="button" class="btn btn-sm btn-primary" onclick="generateReport()">
                     <i class="fas fa-chart-bar me-1"></i>Generate Report
-                </button>
+                </button> {% endcomment %}
             </div>
             <span class="badge bg-success"><i class="fas fa-sync-alt me-1"></i>Updated: {% now "F j, Y" %}</span>
         </div>
@@ -514,10 +514,8 @@
         // Implement actual export functionality here
     }
 
-    // Generate Report Function
-    function generateReport() {
-        alert('Generating detailed report... (Implement report generation)');
-        // Implement report generation here
-    }
+
 </script>
+
+
 {% endblock %}

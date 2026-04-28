@@ -51,7 +51,8 @@ urlpatterns = [
     path('student/<int:student_id>/payments/', views.student_payments, name='student_payments'),
     path('student/<int:student_id>/progress/<int:enrollment_id>/', views.student_progress, name='student_progress'),
     path('export-students-csv/', views.export_students_csv, name='export_students_csv'),
-
+    
+    path('export-report/', views.export_report_pdf, name='export_report_pdf'),
 ]
 if settings.DEBUG: 
  urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

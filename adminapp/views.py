@@ -1356,3 +1356,165 @@ def export_students_csv(request):
         ])
     
     return response
+
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+
+
+
+
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import mm
+from reportlab.graphics.shapes import Drawing, Rect, String, Circle
+from reportlab.graphics import renderPDF
+from django.db.models import Sum
+from datetime import datetime
+
+def export_report_pdf(request):
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="NovaLearn_Report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+
+    # =====================================
+    # COLORS
+    # =====================================
+    pink = colors.HexColor("#E91E63")
+    soft_pink = colors.HexColor("#FCE4EC")
+    dark = colors.HexColor("#222222")
+    silver = colors.HexColor("#B0B0B0")
+
+    # =====================================
+    # BORDER FRAME
+    # =====================================
+    p.setStrokeColor(pink)
+    p.setLineWidth(3)
+    p.rect(15, 15, width-30, height-30)
+
+    p.setStrokeColor(silver)
+    p.setLineWidth(1)
+    p.rect(25, 25, width-50, height-50)
+
+    # =====================================
+    # HEADER BADGE / LOGO
+    # =====================================
+    p.setFillColor(pink)
+    p.circle(width/2, height-80, 28, fill=1)
+
+    p.setFillColor(colors.white)
+    p.setFont("Helvetica-Bold", 24)
+    p.drawCentredString(width/2, height-88, "N")
+
+    # =====================================
+    # TITLE
+    # =====================================
+    p.setFillColor(dark)
+    p.setFont("Helvetica-Bold", 26)
+    p.drawCentredString(width/2, height-140, "NovaLearn")
+
+    p.setFont("Helvetica", 18)
+    p.drawCentredString(width/2, height-165, "Analytics Report")
+
+    # Tagline
+    p.setFillColor(colors.grey)
+    p.setFont("Helvetica-Oblique", 11)
+    p.drawCentredString(
+        width/2,
+        height-185,
+        "Professional Academic Performance Summary"
+    )
+
+    # =====================================
+    # DATE
+    # =====================================
+    p.setFillColor(dark)
+    p.setFont("Helvetica", 10)
+    p.drawCentredString(
+        width/2,
+        height-210,
+        f"Generated on {datetime.now().strftime('%d %B %Y, %I:%M %p')}"
+    )
+
+    # =====================================
+    # FETCH DATA
+    # =====================================
+    total_students = tbl_Student.objects.count()
+    total_teachers = tbl_teacher.objects.count()
+    total_courses = Course.objects.count()
+    total_batches = Batch.objects.count()
+    total_enrollments = tbl_student_enrolment.objects.count()
+
+    total_revenue = tbl_payment.objects.aggregate(
+        total=Sum("amount")
+    )["total"] or 0
+
+    pass_count = tbl_final.objects.filter(final_mark__gte=40).count()
+    fail_count = tbl_final.objects.filter(final_mark__lt=40).count()
+
+    # =====================================
+    # METRIC BOXES
+    # =====================================
+    y = height - 290
+
+    data = [
+        ("Total Students", total_students),
+        ("Total Teachers", total_teachers),
+        ("Total Courses", total_courses),
+        ("Total Revenue", f"₹ {total_revenue}"),
+        ("Total Enrollments", total_enrollments),
+        ("Passed Students", pass_count),
+        ("Failed Students", fail_count),
+        ("Total Batches", total_batches),
+    ]
+
+    x_positions = [45, 300]
+    row = 0
+
+    for i in range(len(data)):
+
+        x = x_positions[i % 2]
+
+        if i % 2 == 0 and i != 0:
+            row += 1
+
+        box_y = y - (row * 55)
+
+        # box
+        p.setFillColor(soft_pink)
+        p.roundRect(x, box_y, 220, 40, 8, fill=1, stroke=0)
+
+        # label
+        p.setFillColor(dark)
+        p.setFont("Helvetica", 10)
+        p.drawString(x+10, box_y+24, data[i][0])
+
+        # value
+        p.setFont("Helvetica-Bold", 12)
+        p.drawRightString(x+205, box_y+24, str(data[i][1]))
+
+    # =====================================
+    # FOOTER CERTIFICATE STYLE
+    # =====================================
+    p.setStrokeColor(pink)
+    p.line(70, 90, 230, 90)
+    p.line(width-230, 90, width-70, 90)
+
+    p.setFillColor(colors.grey)
+    p.setFont("Helvetica", 9)
+
+    p.drawCentredString(150, 75, "Authorized Signature")
+    p.drawCentredString(width-150, 75, "Director Approval")
+
+    p.setFont("Helvetica-Oblique", 8)
+    p.drawCentredString(
+        width/2,
+        45,
+        "Confidential • NovaLearn Internal Use Only"
+    )
+
+    p.save()
+    return response
